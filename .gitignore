@@ -1,0 +1,7 @@
+*.gch
+*.vcxproj
+*.tlog
+*.log
+*.pdb
+STL
+Stuff
