@@ -41,42 +41,73 @@ namespace SelfMadeSTL {
         iterator end_of_storage;
 
     public:
-        // basic constructor, deconstructor
+        // ----- basic constructor, destructor -----
+        // ----- involving allocation and deallocation -----
         explicit vector()
             : start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
-        vector(size_type n, const T& value)
-            : start(nullptr), finish(nullptr), end_of_storage(nullptr) {
+        
+        vector(size_type n, const T& value) {
             start = Alloc::allocate(n);
             finish = SelfMadeSTL::uninitialized_fill_n(start, n, value);
             end_of_storage = finish;
         }
-        explicit vector(const size_type n)
-            : start(nullptr), finish(nullptr), end_of_storage(nullptr) {
+        
+        explicit vector(const size_type n) {
             start = Alloc::allocate(n);
             finish = SelfMadeSTL::uninitialized_fill_n(start, n, value_type());
             end_of_storage = finish;
         }
-        vector(const vector& other);
+        
+        vector(const vector& other) {
+            start = Alloc::allocate(other.size());
+            finish = SelfMadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
+            end_of_storage = finish;
+        }
+
+        vector(const iterator first, const iterator last) {
+            start = Alloc::allocate(last - first);
+            finish = SelfMadeSTL::uninitialized_copy(first, last, begin());
+            end_of_storage = finish;
+        }
+        // -------------------------------------
+        // todo
         vector& operator=(const vector& other);
-        ~vector() {}
+        // todo
+        ~vector() { destory(start, finish); }
+        // todo
+        void reserve(size_type n) {
+            if (capacity() < n) {
+                const size_type old_size = size();
+                const size_type old_capacity = capacity();
+                iterator temp = Alloc::allocate(n);
+                SelfMadeSTL::uninitialized_copy(begin(), end(), temp);
+                destory(start, finish);
+                Alloc::deallocate(start, old_capacity);
+                start = temp;
+                finish = temp + old_size;
+                end_of_storage = temp + n;
+            }
+        }
 
 
-        // iterator function
+        // ----- iterator function -----
         iterator begin() { return start; }
         iterator end() { return finish; }
+        const_iterator begin() const { return start; }
+        const_iterator end() const { return finish; }
         const_iterator cbegin() const { return start; }
         const_iterator cend() const { return finish; }
 
-        // container size/capacity function
+        // ----- container size/capacity function -----
         size_type size() const {
-            return (size_type)(cend() - cbegin());
+            return (size_type)(end() - begin());
         }
         size_type capacity() const {
-            return (size_type)(end_of_storage - cbegin());
+            return (size_type)(end_of_storage - begin());
         }
-        bool empty() const { return cbegin() == cend(); }
+        bool empty() const { return begin() == end(); }
 
-        // element access function
+        // ----- element access function -----
         reference front() { return *begin(); }
         reference back() { return *(end() - 1); }
         reference operator[](size_type idx) { return *(begin() + idx); }
@@ -84,7 +115,7 @@ namespace SelfMadeSTL {
         const_reference back() const { return *(end() - 1); }
         const_reference operator[](size_type idx) const { return *(begin() + idx); }
 
-        // change element in vector function
+        // ----- change element in vector function -----
         void push_back(const T& x) {
             if (finish != end_of_storage) {
                 construct(finish, x);

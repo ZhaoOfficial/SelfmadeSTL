@@ -21,11 +21,10 @@ namespace SelfMadeSTL {
     ForwardIterator _uninitialized_copy_aux(InputIterator first, InputIterator last, ForwardIterator result, __false_type) {
         // if it is not a plain old data
         // construct one by one
-        ForwardIterator retval = result;
         for (; first != last; ++first, ++result) {
-            construct(&*retval, *first);
+            construct(&*result, *first);
         }
-        return retval;
+        return result;
     }
 
     template <typename InputIterator, typename ForwardIterator, typename T>
@@ -49,9 +48,8 @@ namespace SelfMadeSTL {
 
     template <typename ForwardIterator, typename T>
     inline void _uninitialized_fill_aux(ForwardIterator first, ForwardIterator last, const T& value, __false_type) {
-        ForwardIterator ret = first;
-        for (; first != last; ++first, ++ret) {
-            construct(&*ret, value);
+        for (; first != last; ++first) {
+            construct(&*first, value);
         }
     }
 
@@ -74,10 +72,9 @@ namespace SelfMadeSTL {
 
     template<typename ForwardIterator, typename size, typename T>
     ForwardIterator _uninitialized_fill_n_aux(ForwardIterator first, size n, const T& value, __false_type) {
-        ForwardIterator final_pos = first;
-        for (; n > 0; --n, ++final_pos)
-            construct(&*final_pos, value);
-        return final_pos;
+        for (; n > 0; --n, ++first)
+            construct(&*first, value);
+        return first;
     }
 
     template<typename ForwardIterator, typename size, typename T, typename I>

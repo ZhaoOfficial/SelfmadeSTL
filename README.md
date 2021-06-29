@@ -1,5 +1,7 @@
-# Selfmade_STL
-A simple implementation of STL, with the help of early version of G++.
+# SelfMadeSTL
+A simple implementation of STL, with the help of gcc 2.9.5.
+
+This project is implemented by VS2019.
 
 https://blog.csdn.net/corfox_liu
 

@@ -11,6 +11,16 @@ using std::cout;
 using std::endl;
 using std::complex;
 
+template <typename T>
+void basic_test(T& vec) {
+	cout << "size = " << vec.size() << ", "
+		<< "capacity = " << vec.capacity() << ", "
+		<< std::boolalpha
+		<< "is empty = " << vec.empty() << ", "
+		<< "the first element is " << vec[0]
+		<< endl;
+}
+
 int main(int argc, char* argv[]) {
 
 	srand(time(0));
@@ -54,82 +64,58 @@ int main(int argc, char* argv[]) {
 	{
 		cout << "Test of n same constructor of POD:" << endl;
 		SelfMadeSTL::vector<int> self_nsame_pod(1024, 1024);
-		cout << "size = " << self_nsame_pod.size() << ", "
-			<< "capacity = " << self_nsame_pod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << self_nsame_pod.empty() << ", "
-			<< "the first element is " << self_nsame_pod[0]
-			<< endl;
+		basic_test(self_nsame_pod);
 		cout << "Here is the reference:" << endl;
 		std::vector<int> std_nsame_pod(1024, 1024);
-		cout << "size = " << std_nsame_pod.size() << ", "
-			<< "capacity = " << std_nsame_pod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << std_nsame_pod.empty() << ", "
-			<< "the first element is " << std_nsame_pod[0]
-			<< endl;
+		basic_test(std_nsame_pod);
 	}
 	cout << endl;
 	{
 		cout << "Test of n same constructor of non-POD:" << endl;
 		SelfMadeSTL::vector<complex<double>> self_nsame_nonpod(1024, complex<double>(1024, 2048));
-		cout << "size = " << self_nsame_nonpod.size() << ", "
-			<< "capacity = " << self_nsame_nonpod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << self_nsame_nonpod.empty() << ", "
-			<< "the first element is " << self_nsame_nonpod[0]
-			<< endl;
+		basic_test(self_nsame_nonpod);
 		cout << "Here is the reference:" << endl;
 		std::vector<complex<double>> std_nsame_nonpod(1024, complex<double>(1024, 2048));
-		cout << "size = " << std_nsame_nonpod.size() << ", "
-			<< "capacity = " << std_nsame_nonpod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << std_nsame_nonpod.empty() << ", "
-			<< "the first element is " << std_nsame_nonpod[0]
-			<< endl;
+		basic_test(self_nsame_nonpod);
 	}
 	cout << endl;
 
 	// --------------------------------------------------
 	{
-		cout << "Test of n default constructor of POD:" << endl;
+		cout << "Test of n default constructor:" << endl;
 		SelfMadeSTL::vector<int> self_n_pod(1024);
-		cout << "size = " << self_n_pod.size() << ", "
-			<< "capacity = " << self_n_pod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << self_n_pod.empty() << ", "
-			<< "the first element is " << self_n_pod[0]
-			<< endl;
+		basic_test(self_n_pod);
 		cout << "Here is the reference:" << endl;
 		std::vector<int> std_nsame_pod(1024);
-		cout << "size = " << std_nsame_pod.size() << ", "
-			<< "capacity = " << std_nsame_pod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << std_nsame_pod.empty() << ", "
-			<< "the first element is " << std_nsame_pod[0]
-			<< endl;
-	}
-	cout << endl;
-	{
-		cout << "Test of n default constructor of non-POD:" << endl;
-		SelfMadeSTL::vector<complex<double>> self_n_nonpod(1024);
-		cout << "size = " << self_n_nonpod.size() << ", "
-			<< "capacity = " << self_n_nonpod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << self_n_nonpod.empty() << ", "
-			<< "the first element is " << self_n_nonpod[0]
-			<< endl;
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_n_nonpod(1024);
-		cout << "size = " << std_n_nonpod.size() << ", "
-			<< "capacity = " << std_n_nonpod.capacity() << ", "
-			<< std::boolalpha
-			<< "is empty = " << std_n_nonpod.empty() << ", "
-			<< "the first element is " << std_n_nonpod[0]
-			<< endl;
+		basic_test(std_nsame_pod);
 	}
 	cout << endl;
 
-	
+	// --------------------------------------------------
+	{
+		cout << "Test of copy constructor:" << endl;
+		SelfMadeSTL::vector<complex<double>> self_copying(1024, complex<double>(1024, 4096));
+		SelfMadeSTL::vector<complex<double>> self_copied(self_copying);
+		basic_test(self_copied);
+		cout << "Here is the reference:" << endl;
+		std::vector<complex<double>> std_copying(1024, complex<double>(1024, 4096));
+		std::vector<complex<double>> std_copied(std_copying);
+		basic_test(std_copied);
+	}
+	cout << endl;
+
+	// --------------------------------------------------
+	{
+		complex<double>* arr = new complex<double>[1024];
+		cout << "Test of iterator constructor:" << endl;
+		SelfMadeSTL::vector<complex<double>> self_it(arr, arr + 1024);
+		basic_test(self_it);
+		cout << "Here is the reference:" << endl;
+		std::vector<complex<double>> std_it(arr, arr + 1024);
+		basic_test(std_it);
+		delete[] arr;
+	}
+	cout << endl;
+
 	return 0;
 }
