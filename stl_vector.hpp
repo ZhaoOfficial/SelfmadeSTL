@@ -23,7 +23,7 @@ namespace SelfMadeSTL {
         typedef const T*    const_pointer;
         typedef const T*    const_iterator;
         typedef const T&    const_reference;
-        typedef Alloc       vector_allocator;
+        typedef simple_alloc<T, Alloc> vector_allocator;
 
     protected:
         // ----- member variable -----
@@ -38,10 +38,10 @@ namespace SelfMadeSTL {
     protected:
         // allocator and deallocator, easy for use
 
-        static pointer vec_allocate(size_type n) {
+        static pointer vector_allocate(size_type n) {
             return vector_allocator::allocate(n);
         }
-        static void vec_deallocate(pointer ptr, size_type n) {
+        static void vector_deallocate(pointer ptr, size_type n) {
             vector_allocator::deallocate(ptr, n);
         }
 
@@ -62,7 +62,7 @@ namespace SelfMadeSTL {
                 // allocate new space
                 const size_type old_capacity = capacity();
                 const size_type new_capacity = old_capacity != 0 ? 2 * old_capacity : 1;
-                iterator new_start = vec_allocate(new_capacity);
+                iterator new_start = vector_allocate(new_capacity);
                 iterator new_finish = new_start;
                 try {
                     // copy old [start, pos) to new [start, pos)
@@ -76,12 +76,12 @@ namespace SelfMadeSTL {
                 catch (const std::exception&) {
                     // exception handling
                     destory(new_start, new_finish);
-                    vec_deallocate(new_start, new_capacity);
+                    vector_deallocate(new_start, new_capacity);
                     throw;
                 }
                 // destroy and deallocation old space and assignment
                 destory(begin(), end());
-                vec_deallocate(start, old_capacity);
+                vector_deallocate(start, old_capacity);
                 start = new_start;
                 finish = new_finish;
                 end_of_storage = new_start + new_capacity;
@@ -98,7 +98,7 @@ namespace SelfMadeSTL {
             else {
                 const size_type old_capacity = capacity();
                 const size_type new_capacity = old_capacity != 0 ? 2 * old_capacity : 1;
-                iterator new_start = vec_allocate(new_capacity);
+                iterator new_start = vector_allocate(new_capacity);
                 iterator new_finish = new_start;
                 try {
                     new_finish = uninitialized_copy(start, pos, new_start);
@@ -108,11 +108,11 @@ namespace SelfMadeSTL {
                 }
                 catch (const std::exception&) {
                     destory(new_start, new_finish);
-                    vec_deallocate(new_start, new_capacity);
+                    vector_deallocate(new_start, new_capacity);
                     throw;
                 }
                 destory(begin(), end());
-                vec_deallocate(start, old_capacity);
+                vector_deallocate(start, old_capacity);
                 start = new_start;
                 finish = new_finish;
                 end_of_storage = new_start + new_capacity;
@@ -127,19 +127,19 @@ namespace SelfMadeSTL {
             : start(nullptr), finish(nullptr), end_of_storage(nullptr) {}
         
         vector(size_type n, const T& value) {
-            start = vec_allocate(n);
+            start = vector_allocate(n);
             finish = SelfMadeSTL::uninitialized_fill_n(start, n, value);
             end_of_storage = finish;
         }
         
         explicit vector(const size_type n) {
-            start = vec_allocate(n);
+            start = vector_allocate(n);
             finish = SelfMadeSTL::uninitialized_fill_n(start, n, value_type());
             end_of_storage = finish;
         }
 
         vector(const vector& other) {
-            start = vec_allocate(other.size());
+            start = vector_allocate(other.size());
             finish = SelfMadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
             end_of_storage = finish;
         }
@@ -154,7 +154,7 @@ namespace SelfMadeSTL {
         }
 
         vector(const iterator first, const iterator last) {
-            start = vec_allocate(last - first);
+            start = vector_allocate(last - first);
             finish = SelfMadeSTL::uninitialized_copy(first, last, begin());
             end_of_storage = finish;
         }
@@ -164,13 +164,17 @@ namespace SelfMadeSTL {
                 return *this;
             }
             else {
-                return vector(other);
+                destory(start, finish);
+                vector_deallocate(start, capacity());
+                start = vector_allocate(other.size());
+                finish = SelfMadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
+                end_of_storage = finish;
             }
         }
 
         ~vector() {
             destory(start, finish);
-            vec_deallocate(start, capacity());
+            vector_deallocate(start, capacity());
             start = nullptr;
             finish = nullptr;
             end_of_storage = nullptr;
@@ -290,7 +294,7 @@ namespace SelfMadeSTL {
                     const size_type old_size = size();
                     const size_type old_capacity = capacity();
                     const size_type new_capacity = old_size + n;
-                    iterator new_start = vec_allocate(new_capacity);
+                    iterator new_start = vector_allocate(new_capacity);
                     iterator new_finish = new_start;
                     try {
                         // copy old [start, pos) to new [start, pos)
@@ -303,12 +307,12 @@ namespace SelfMadeSTL {
                     catch (const std::exception&) {
                         // exception handling
                         destory(new_start, new_finish);
-                        vec_deallocate(new_start, new_capacity);
+                        vector_deallocate(new_start, new_capacity);
                         throw;
                     }
                     // destroy and deallocation old space and assignment
                     destory(begin(), end());
-                    vec_deallocate(start, old_capacity);
+                    vector_deallocate(start, old_capacity);
                     start = new_start;
                     finish = new_finish;
                     end_of_storage = new_start + new_capacity;
@@ -347,7 +351,7 @@ namespace SelfMadeSTL {
                     const size_type old_size = size();
                     const size_type old_capacity = capacity();
                     const size_type new_capacity = old_size + n;
-                    iterator new_start = vec_allocate(new_capacity);
+                    iterator new_start = vector_allocate(new_capacity);
                     iterator new_finish = new_start;
                     try {
                         new_finish = uninitialized_copy(start, pos, new_start);
@@ -356,11 +360,11 @@ namespace SelfMadeSTL {
                     }
                     catch (const std::exception&) {
                         destory(new_start, new_finish);
-                        vec_deallocate(new_start, new_capacity);
+                        vector_deallocate(new_start, new_capacity);
                         throw;
                     }
                     destory(begin(), end());
-                    vec_deallocate(start, old_capacity);
+                    vector_deallocate(start, old_capacity);
                     start = new_start;
                     finish = new_finish;
                     end_of_storage = new_start + new_capacity;
@@ -399,10 +403,10 @@ namespace SelfMadeSTL {
         void reserve(size_type n) {
             if (capacity() < n) {
                 const size_type old_capacity = capacity();
-                iterator new_start = vec_allocate(n);
+                iterator new_start = vector_allocate(n);
                 iterator new_finish = uninitialized_copy(begin(), end(), new_start);
                 destory(start, finish);
-                vec_deallocate(start, old_capacity);
+                vector_deallocate(start, old_capacity);
                 start = new_start;
                 finish = new_finish;
                 end_of_storage = new_start + n;
@@ -411,10 +415,10 @@ namespace SelfMadeSTL {
 
         void shrink_to_fit() {
             if (size() != capacity()) {
-                iterator new_start = vec_allocate(size());
+                iterator new_start = vector_allocate(size());
                 iterator new_finish = uninitialized_copy(begin(), end(), new_start);
                 destory(start, finish);
-                vec_deallocate(start, capacity());
+                vector_deallocate(start, capacity());
                 start = new_start;
                 finish = new_finish;
                 end_of_storage = new_finish;
@@ -436,6 +440,11 @@ namespace SelfMadeSTL {
         bool operator!=(const vector& other) {
             return !operator==(other);
         }
+
+        bool operator<(const list& other) {
+            return lexicographical_compare(begin(), end(), other.begin(), other.end());
+        }
+
     };
 }
 
