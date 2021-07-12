@@ -91,14 +91,15 @@ namespace SelfMadeSTL {
 	typedef __malloc_alloc_template<0> malloc_alloc;
 
 	// capsule
+
 	template<class T, class _Alloc>
 	class simple_alloc {
 	public:
 		static T* allocate(size_t __n) {
-			return 0 == __n ? 0 : (T*)_Alloc::allocate(__n * sizeof(T));
+			return 0 == __n ? 0 : static_cast<T*>(_Alloc::allocate(__n * sizeof(T)));
 		}
 		static T* allocate(void) {
-			return (T*)_Alloc::allocate(sizeof(T));
+			return static_cast<T*>(_Alloc::allocate(sizeof(T)));
 		}
 		static void deallocate(T* __p, size_t __n) {
 			if (0 != __n)

@@ -11,9 +11,9 @@ namespace SelfMadeSTL {
 
 	template <typename T>
 	struct list_node {
-		list_node* prev;
-		list_node* next;
-		T          data;
+		list_node<T>* prev;
+		list_node<T>* next;
+		T             data;
 	};
 
 	template <typename T, typename Ref, typename Ptr>
@@ -74,7 +74,7 @@ namespace SelfMadeSTL {
 		typedef const T&        const_reference;
 		typedef list_node<T>    node;
 
-		typedef simple_alloc<T, Alloc> list_allocator;
+		typedef simple_alloc<node, Alloc> list_allocator;
 
 		typedef list_iterator<T, T&, T*>             iterator;
 		typedef list_iterator<T, const T&, const T*> const_iterator;
@@ -84,7 +84,7 @@ namespace SelfMadeSTL {
 
 	// auxilary function
 	private:
-		node* get_node() { return list_allocator::allocate(1); }
+		node* get_node() { return list_allocator::allocate((size_type)1); }
 		void put_node(node* n) { list_allocator::deallocate(n); }
 		node* new_node(const T& value) {
 			node* n = get_node();
@@ -167,8 +167,12 @@ namespace SelfMadeSTL {
 			return n1 == s1 && n2 == s2;
 		}
 
+		bool operator!=(const list& other) {
+			return !operator==(other);
+		}
+
 		bool operator<(const list& other) {
-			return lexicographical_compare(begin(), end(), other.begin(), other.end());
+			return SelfMadeSTL::lexicographical_compare(begin(), end(), other.begin(), other.end());
 		}
 
 		iterator insert(iterator pos, const T& value = value_type()) {

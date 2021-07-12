@@ -1,9 +1,10 @@
 #include <iostream>
 #include <cstdlib>
-#include <ctime>
 #include <vector>
 #include <complex>
+#include <random>
 
+#include "test_function.hpp"
 #include "../stl_vector.hpp"
 #include "../stl_type_traits.hpp"
 
@@ -23,20 +24,53 @@ template <typename T>
 void element_test(T& vec) {
 	cout << "The first is : " << vec.front() << ", "
 		<< "The middle is : " << vec[vec.size() / 2] << ", "
-		<< "The last is : " << vec.back() << ", " << endl;
+		<< "The last is : " << vec.back() << endl;
+
 }
 
 int main(int argc, char* argv[]) {
 
-	srand(time(0));
+	std::default_random_engine rng;
+	std::uniform_int_distribution<int> uniform_int(0, 10);
+	std::uniform_real_distribution<double> uniform_double(0, 1);
 	// --------------------------------------------------
 	{
+		int* arr1 = new int[1024];
+		int* arr2 = new int[1024];
+		for (size_t i = 0; i < 1024; ++i) {
+			arr1[i] = uniform_int(rng);
+			arr2[i] = uniform_int(rng);
+		}
 		cout << "Test of default constructor of POD:" << endl;
 		SelfMadeSTL::vector<int> self_default_pod;
+		SelfMadeSTL::vector<int> self_default_pod2;
 		basic_test(self_default_pod);
+		self_default_pod.insert(self_default_pod.begin(), arr1, arr1 + 1024);
+		self_default_pod2.insert(self_default_pod2.begin(), arr2, arr2 + 1024);
+		element_test(self_default_pod);
+		element_test(self_default_pod2);
+		cout << (self_default_pod == self_default_pod2) << ", "
+			<< (self_default_pod != self_default_pod2) << ", "
+			<< (self_default_pod < self_default_pod2) << endl;
+		self_default_pod.swap(self_default_pod2);
+		element_test(self_default_pod);
+		element_test(self_default_pod2);
+
+
 		cout << "Here is the reference:" << endl;
 		std::vector<int> std_default_pod;
+		std::vector<int> std_default_pod2;
 		basic_test(std_default_pod);
+		std_default_pod.insert(std_default_pod.begin(), arr1, arr1 + 1024);
+		std_default_pod2.insert(std_default_pod2.begin(), arr2, arr2 + 1024);
+		element_test(std_default_pod);
+		element_test(std_default_pod2);
+		cout << (std_default_pod == std_default_pod2) << ", "
+			<< (std_default_pod != std_default_pod2) << ", "
+			<< (std_default_pod < std_default_pod2) << endl;
+		std_default_pod.swap(std_default_pod2);
+		element_test(std_default_pod);
+		element_test(std_default_pod2);
 	}
 	cout << endl;
 	{
@@ -52,11 +86,13 @@ int main(int argc, char* argv[]) {
 	// --------------------------------------------------
 	{
 		cout << "Test of n same constructor of POD:" << endl;
-		SelfMadeSTL::vector<int> self_nsame_pod(1024, 1024);
+		
+		SelfMadeSTL::vector<int> self_nsame_pod(1024);
 		basic_test(self_nsame_pod);
 		element_test(self_nsame_pod);
+
 		cout << "Here is the reference:" << endl;
-		std::vector<int> std_nsame_pod(1024, 1024);
+		std::vector<int> std_nsame_pod(1024);
 		basic_test(std_nsame_pod);
 		element_test(std_nsame_pod);
 	}
@@ -112,6 +148,7 @@ int main(int argc, char* argv[]) {
 		std::vector<complex<double>> std_it(arr, arr + 1024);
 		basic_test(std_it);
 		element_test(std_it);
+		cout << std::boolalpha << SelfMadeSTL::container_equal(self_it, std_it) << endl;
 		delete[] arr;
 	}
 	cout << endl;
@@ -137,10 +174,10 @@ int main(int argc, char* argv[]) {
 	{
 		complex<double>* arr = new complex<double>[1024];
 		for (size_t i = 0; i < 1024; ++i) {
-			arr[i] = complex<double>(rand() / (RAND_MAX * 1.0), rand() / (RAND_MAX * 1.0));
+			arr[i] = complex<double>(uniform_double(rng), uniform_double(rng));
 		}
 		cout << "Test of functions:" << endl;
-		std::vector<complex<double>> self_func(arr, arr + 128);
+		SelfMadeSTL::vector<complex<double>> self_func(arr, arr + 128);
 		basic_test(self_func);
 		for (size_t i = 128; i < 256; ++i) {
 			self_func.push_back(arr[i]);
@@ -168,7 +205,7 @@ int main(int argc, char* argv[]) {
 			std_func.push_back(arr[i]);
 		}
 		std_func.insert(std_func.begin(), arr + 256, arr + 384);
-		basic_test(self_func);
+		basic_test(std_func);
 		std_func.shrink_to_fit();
 		basic_test(std_func);
 		element_test(std_func);
