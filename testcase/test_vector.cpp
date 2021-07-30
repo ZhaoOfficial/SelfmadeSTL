@@ -4,13 +4,16 @@
 #include <complex>
 #include <random>
 
-#include "test_function.hpp"
 #include "../stl_vector.hpp"
 #include "../stl_type_traits.hpp"
+#include "test_function.hpp"
 
 using std::cout;
 using std::endl;
 using std::complex;
+using std::default_random_engine;
+using std::uniform_real_distribution;
+using std::numeric_limits;
 
 template <typename T>
 void basic_test(T& vec) {
@@ -29,199 +32,329 @@ void element_test(T& vec) {
 }
 
 int main(int argc, char* argv[]) {
+	// initialize
+	const size_t pod_size = 100000;
+	const size_t npod_size = pod_size / 2;
+	double* pod_data = new double[pod_size];
+	Npod* npod_data = new Npod[npod_size];
 
-	std::default_random_engine rng;
-	std::uniform_int_distribution<int> uniform_int(0, 10);
-	std::uniform_real_distribution<double> uniform_double(0, 1);
-	// --------------------------------------------------
+	default_random_engine rng;
+	uniform_real_distribution<double> uniform_double(
+		numeric_limits<double>::min(), numeric_limits<double>::max()
+	);
+	for (size_t i = 0; i < pod_size; ++i) {
+		pod_data[i] = uniform_double(rng);
+	}
+	for (size_t i = 0; i < npod_size; ++i) {
+		npod_data[i].ptr->real(pod_data[2 * i]);
+		npod_data[i].ptr->imag(pod_data[2 * i + 1]);
+	}
+
+	// testing
 	{
-		int* arr1 = new int[1024];
-		int* arr2 = new int[1024];
-		for (size_t i = 0; i < 1024; ++i) {
-			arr1[i] = uniform_int(rng);
-			arr2[i] = uniform_int(rng);
-		}
-		cout << "Test of default constructor of POD:" << endl;
-		SelfMadeSTL::vector<int> self_default_pod;
-		SelfMadeSTL::vector<int> self_default_pod2;
-		basic_test(self_default_pod);
-		self_default_pod.insert(self_default_pod.begin(), arr1, arr1 + 1024);
-		self_default_pod2.insert(self_default_pod2.begin(), arr2, arr2 + 1024);
-		element_test(self_default_pod);
-		element_test(self_default_pod2);
-		cout << (self_default_pod == self_default_pod2) << ", "
-			<< (self_default_pod != self_default_pod2) << ", "
-			<< (self_default_pod < self_default_pod2) << endl;
+		cout << "----- Test of POD default constructor and copy constructor -----\n";
+		SelfMadeSTL::vector<double> self_default_pod;
+		cout << std::boolalpha << "is empty? "
+			<< self_default_pod.empty() << "\n";
+
+		self_default_pod.insert(self_default_pod.begin(), 0.0);
+		self_default_pod.push_back(pod_data[0]);
+		self_default_pod.insert(self_default_pod.end(), pod_data + 1, pod_data + pod_size);
+		cout << "push_back: size = " << self_default_pod.size() << ", "
+			<< "capacity = " << self_default_pod.capacity() << ", "
+			<< "front() = " << self_default_pod.front() << ", "
+			<< "back() = " << self_default_pod.back() << "\n";
+
+		self_default_pod.pop_back();
+		cout << "pop: size = " << self_default_pod.size() << ", "
+			<< "capacity = " << self_default_pod.capacity() << ", "
+			<< "front() = " << self_default_pod.front() << ", "
+			<< "back() = " << self_default_pod.back() << "\n";
+
+		SelfMadeSTL::vector<double> self_default_pod2(self_default_pod);
+		cout << std::boolalpha << "is the same? "
+			<< (self_default_pod == self_default_pod2) << ", "
+			<< (self_default_pod != self_default_pod2) << "\n";
+
+		self_default_pod2.insert(self_default_pod2.end(), self_default_pod.begin(), self_default_pod.end());
+		self_default_pod2.insert(self_default_pod2.end(), 2, 1.0);
+		cout << "insert: size = " << self_default_pod2.size() << ", "
+			<< "capacity = " << self_default_pod2.capacity() << ", "
+			<< "front() = " << self_default_pod2.front() << ", "
+			<< "back() = " << self_default_pod2.back() << "\n";
+
+		self_default_pod2.erase(self_default_pod2.begin());
+		cout << "erase: size = " << self_default_pod2.size() << ", "
+			<< "capacity = " << self_default_pod2.capacity() << ", "
+			<< "front() = " << self_default_pod2.front() << ", "
+			<< "back() = " << self_default_pod2.back() << "\n";
+
+		self_default_pod2.resize(pod_size - 1);
+		cout << "resize: size = " << self_default_pod2.size() << ", "
+			<< "capacity = " << self_default_pod2.capacity() << ", "
+			<< "front() = " << self_default_pod2.front() << ", "
+			<< "back() = " << self_default_pod2.back() << "\n";
+
+		self_default_pod2.resize(2 * pod_size);
+		cout << "resize: size = " << self_default_pod2.size() << ", "
+			<< "capacity = " << self_default_pod2.capacity() << ", "
+			<< "front() = " << self_default_pod2.front() << ", "
+			<< "back() = " << self_default_pod2.back() << "\n";
+
+		self_default_pod2.shrink_to_fit();
+		cout << "shrink_to_fit: size = " << self_default_pod2.size() << ", "
+			<< "capacity = " << self_default_pod2.capacity() << ", "
+			<< "front() = " << self_default_pod2.front() << ", "
+			<< "back() = " << self_default_pod2.back() << "\n";
+
 		self_default_pod.swap(self_default_pod2);
-		element_test(self_default_pod);
-		element_test(self_default_pod2);
+		cout << "swap: size1 = " << self_default_pod.size() << ", "
+			<< "capacity1 = " << self_default_pod.capacity() << ", "
+			<< "front() = " << self_default_pod.front() << ", "
+			<< "back() = " << self_default_pod.back() << "\n"
+			<< "swap: size2 = " << self_default_pod2.size() << ", "
+			<< "capacity2 = " << self_default_pod2.capacity() << ", "
+			<< "front() = " << self_default_pod2.front() << ", "
+			<< "back() = " << self_default_pod2.back() << "\n";
+	}
+	cout << endl;
+	{
+		cout << "----- Here is the reference -----\n";
+		std::vector<double> std_default_pod;
+		cout << std::boolalpha << "is empty? "
+			<< std_default_pod.empty() << "\n";
 
+		std_default_pod.insert(std_default_pod.begin(), 0.0);
+		std_default_pod.push_back(pod_data[0]);
+		std_default_pod.insert(std_default_pod.end(), pod_data + 1, pod_data + pod_size);
+		cout << "push_back: size = " << std_default_pod.size() << ", "
+			<< "capacity = " << std_default_pod.capacity() << ", "
+			<< "front() = " << std_default_pod.front() << ", "
+			<< "back() = " << std_default_pod.back() << "\n";
 
-		cout << "Here is the reference:" << endl;
-		std::vector<int> std_default_pod;
-		std::vector<int> std_default_pod2;
-		basic_test(std_default_pod);
-		std_default_pod.insert(std_default_pod.begin(), arr1, arr1 + 1024);
-		std_default_pod2.insert(std_default_pod2.begin(), arr2, arr2 + 1024);
-		element_test(std_default_pod);
-		element_test(std_default_pod2);
-		cout << (std_default_pod == std_default_pod2) << ", "
-			<< (std_default_pod != std_default_pod2) << ", "
-			<< (std_default_pod < std_default_pod2) << endl;
+		std_default_pod.pop_back();
+		cout << "pop: size = " << std_default_pod.size() << ", "
+			<< "capacity = " << std_default_pod.capacity() << ", "
+			<< "front() = " << std_default_pod.front() << ", "
+			<< "back() = " << std_default_pod.back() << "\n";
+
+		std::vector<double> std_default_pod2(std_default_pod);
+		cout << std::boolalpha << "is the same? "
+			<< (std_default_pod == std_default_pod2) << ", "
+			<< (std_default_pod != std_default_pod2) << "\n";
+
+		std_default_pod2.insert(std_default_pod2.end(), std_default_pod.begin(), std_default_pod.end());
+		std_default_pod2.insert(std_default_pod2.end(), 2, 1.0);
+		cout << "insert: size = " << std_default_pod2.size() << ", "
+			<< "capacity = " << std_default_pod2.capacity() << ", "
+			<< "front() = " << std_default_pod2.front() << ", "
+			<< "back() = " << std_default_pod2.back() << "\n";
+
+		std_default_pod2.erase(std_default_pod2.begin());
+		cout << "erase: size = " << std_default_pod2.size() << ", "
+			<< "capacity = " << std_default_pod2.capacity() << ", "
+			<< "front() = " << std_default_pod2.front() << ", "
+			<< "back() = " << std_default_pod2.back() << "\n";
+
+		std_default_pod2.resize(pod_size - 1);
+		cout << "resize: size = " << std_default_pod2.size() << ", "
+			<< "capacity = " << std_default_pod2.capacity() << ", "
+			<< "front() = " << std_default_pod2.front() << ", "
+			<< "back() = " << std_default_pod2.back() << "\n";
+
+		std_default_pod2.resize(2 * pod_size);
+		cout << "resize: size = " << std_default_pod2.size() << ", "
+			<< "capacity = " << std_default_pod2.capacity() << ", "
+			<< "front() = " << std_default_pod2.front() << ", "
+			<< "back() = " << std_default_pod2.back() << "\n";
+
+		std_default_pod2.shrink_to_fit();
+		cout << "shrink_to_fit: size = " << std_default_pod2.size() << ", "
+			<< "capacity = " << std_default_pod2.capacity() << ", "
+			<< "front() = " << std_default_pod2.front() << ", "
+			<< "back() = " << std_default_pod2.back() << "\n";
+
 		std_default_pod.swap(std_default_pod2);
-		element_test(std_default_pod);
-		element_test(std_default_pod2);
+		cout << "swap: size1 = " << std_default_pod.size() << ", "
+			<< "capacity1 = " << std_default_pod.capacity() << ", "
+			<< "front() = " << std_default_pod.front() << ", "
+			<< "back() = " << std_default_pod.back() << "\n"
+			<< "swap: size2 = " << std_default_pod2.size() << ", "
+			<< "capacity2 = " << std_default_pod2.capacity() << ", "
+			<< "front() = " << std_default_pod2.front() << ", "
+			<< "back() = " << std_default_pod2.back() << "\n";
 	}
 	cout << endl;
 	{
-		cout << "Test of default constructor of non-POD:" << endl;
-		SelfMadeSTL::vector<complex<double>> self_default_nonpod;
-		basic_test(self_default_nonpod);
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_default_nonpod;
-		basic_test(std_default_nonpod);
+		cout << "----- Test of non-POD default constructor and copy constructor -----\n";
+		SelfMadeSTL::vector<Npod> self_default_npod;
+		cout << std::boolalpha << "is empty? "
+			<< self_default_npod.empty() << "\n";
+
+		self_default_npod.insert(self_default_npod.begin(), Npod());
+		self_default_npod.push_back(npod_data[0]);
+		self_default_npod.insert(self_default_npod.end(), npod_data + 1, npod_data + npod_size);
+		cout << "push_back: size = " << self_default_npod.size() << ", "
+			<< "capacity = " << self_default_npod.capacity() << ", "
+			<< "front() = " << self_default_npod.front().ptr->real() << ", "
+			<< self_default_npod.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod.back().ptr->real() << ", "
+			<< self_default_npod.back().ptr->imag() << "\n";
+
+		self_default_npod.pop_back();
+		cout << "pop: size = " << self_default_npod.size() << ", "
+			<< "capacity = " << self_default_npod.capacity() << ", "
+			<< "front() = " << self_default_npod.front().ptr->real() << ", "
+			<< self_default_npod.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod.back().ptr->real() << ", "
+			<< self_default_npod.back().ptr->imag() << "\n";
+
+		SelfMadeSTL::vector<Npod> self_default_npod2(self_default_npod);
+		cout << std::boolalpha << "is the same? "
+			<< (self_default_npod == self_default_npod2) << ", "
+			<< (self_default_npod != self_default_npod2) << "\n";
+
+		self_default_npod2.insert(self_default_npod2.end(), self_default_npod.begin(), self_default_npod.end());
+		self_default_npod2.insert(self_default_npod2.end(), 2, Npod());
+		cout << "insert: size = " << self_default_npod2.size() << ", "
+			<< "capacity = " << self_default_npod2.capacity() << ", "
+			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
+			<< self_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
+			<< self_default_npod2.back().ptr->imag() << "\n";
+
+		self_default_npod2.erase(self_default_npod2.begin());
+		cout << "erase: size = " << self_default_npod2.size() << ", "
+			<< "capacity = " << self_default_npod2.capacity() << ", "
+			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
+			<< self_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
+			<< self_default_npod2.back().ptr->imag() << "\n";
+
+		self_default_npod2.resize(npod_size - 1);
+		cout << "resize: size = " << self_default_npod2.size() << ", "
+			<< "capacity = " << self_default_npod2.capacity() << ", "
+			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
+			<< self_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
+			<< self_default_npod2.back().ptr->imag() << "\n";
+
+		self_default_npod2.resize(2 * npod_size);
+		cout << "resize: size = " << self_default_npod2.size() << ", "
+			<< "capacity = " << self_default_npod2.capacity() << ", "
+			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
+			<< self_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
+			<< self_default_npod2.back().ptr->imag() << "\n";
+
+		self_default_npod2.shrink_to_fit();
+		cout << "shrink_to_fit: size = " << self_default_npod2.size() << ", "
+			<< "capacity = " << self_default_npod2.capacity() << ", "
+			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
+			<< self_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
+			<< self_default_npod2.back().ptr->imag() << "\n";
+
+		self_default_npod.swap(self_default_npod2);
+		cout << "swap: size1 = " << self_default_npod.size() << ", "
+			<< "capacity1 = " << self_default_npod.capacity() << ", "
+			<< "front() = " << self_default_npod.front().ptr->real() << ", "
+			<< self_default_npod.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod.back().ptr->real() << ", "
+			<< self_default_npod.back().ptr->imag() << "\n"
+			<< "size2 = " << self_default_npod2.size() << ", "
+			<< "capacity2 = " << self_default_npod2.capacity() << ", "
+			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
+			<< self_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
+			<< self_default_npod2.back().ptr->imag() << "\n";
 	}
 	cout << endl;
-
-	// --------------------------------------------------
 	{
-		cout << "Test of n same constructor of POD:" << endl;
-		
-		SelfMadeSTL::vector<int> self_nsame_pod(1024);
-		basic_test(self_nsame_pod);
-		element_test(self_nsame_pod);
+		cout << "----- Here is the reference -----\n";
+		SelfMadeSTL::vector<Npod> std_default_npod;
+		cout << std::boolalpha << "is empty? "
+			<< std_default_npod.empty() << "\n";
 
-		cout << "Here is the reference:" << endl;
-		std::vector<int> std_nsame_pod(1024);
-		basic_test(std_nsame_pod);
-		element_test(std_nsame_pod);
+		std_default_npod.insert(std_default_npod.begin(), Npod());
+		std_default_npod.push_back(npod_data[0]);
+		std_default_npod.insert(std_default_npod.end(), npod_data + 1, npod_data + npod_size);
+		cout << "push_back: size = " << std_default_npod.size() << ", "
+			<< "capacity = " << std_default_npod.capacity() << ", "
+			<< "front() = " << std_default_npod.front().ptr->real() << ", "
+			<< std_default_npod.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod.back().ptr->real() << ", "
+			<< std_default_npod.back().ptr->imag() << "\n";
+
+		std_default_npod.pop_back();
+		cout << "pop: size = " << std_default_npod.size() << ", "
+			<< "capacity = " << std_default_npod.capacity() << ", "
+			<< "front() = " << std_default_npod.front().ptr->real() << ", "
+			<< std_default_npod.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod.back().ptr->real() << ", "
+			<< std_default_npod.back().ptr->imag() << "\n";
+
+		SelfMadeSTL::vector<Npod> std_default_npod2(std_default_npod);
+		cout << std::boolalpha << "is the same? "
+			<< (std_default_npod == std_default_npod2) << ", "
+			<< (std_default_npod != std_default_npod2) << "\n";
+
+		std_default_npod2.insert(std_default_npod2.end(), std_default_npod.begin(), std_default_npod.end());
+		std_default_npod2.insert(std_default_npod2.end(), 2, Npod());
+		cout << "insert: size = " << std_default_npod2.size() << ", "
+			<< "capacity = " << std_default_npod2.capacity() << ", "
+			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
+			<< std_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
+			<< std_default_npod2.back().ptr->imag() << "\n";
+
+		std_default_npod2.erase(std_default_npod2.begin());
+		cout << "erase: size = " << std_default_npod2.size() << ", "
+			<< "capacity = " << std_default_npod2.capacity() << ", "
+			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
+			<< std_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
+			<< std_default_npod2.back().ptr->imag() << "\n";
+
+		std_default_npod2.resize(npod_size - 1);
+		cout << "resize: size = " << std_default_npod2.size() << ", "
+			<< "capacity = " << std_default_npod2.capacity() << ", "
+			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
+			<< std_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
+			<< std_default_npod2.back().ptr->imag() << "\n";
+
+		std_default_npod2.resize(2 * npod_size);
+		cout << "resize: size = " << std_default_npod2.size() << ", "
+			<< "capacity = " << std_default_npod2.capacity() << ", "
+			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
+			<< std_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
+			<< std_default_npod2.back().ptr->imag() << "\n";
+
+		std_default_npod2.shrink_to_fit();
+		cout << "shrink_to_fit: size = " << std_default_npod2.size() << ", "
+			<< "capacity = " << std_default_npod2.capacity() << ", "
+			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
+			<< std_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
+			<< std_default_npod2.back().ptr->imag() << "\n";
+
+		std_default_npod.swap(std_default_npod2);
+		cout << "swap: size1 = " << std_default_npod.size() << ", "
+			<< "capacity1 = " << std_default_npod.capacity() << ", "
+			<< "front() = " << std_default_npod.front().ptr->real() << ", "
+			<< std_default_npod.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod.back().ptr->real() << ", "
+			<< std_default_npod.back().ptr->imag() << "\n"
+			<< "size2 = " << std_default_npod2.size() << ", "
+			<< "capacity2 = " << std_default_npod2.capacity() << ", "
+			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
+			<< std_default_npod2.front().ptr->imag() << ", "
+			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
+			<< std_default_npod2.back().ptr->imag() << "\n";
 	}
 	cout << endl;
-	{
-		cout << "Test of n same constructor of non-POD:" << endl;
-		SelfMadeSTL::vector<complex<double>> self_nsame_nonpod(1024, complex<double>(1024, 2048));
-		basic_test(self_nsame_nonpod);
-		element_test(self_nsame_nonpod);
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_nsame_nonpod(1024, complex<double>(1024, 2048));
-		basic_test(std_nsame_nonpod);
-		element_test(std_nsame_nonpod);
-	}
-	cout << endl;
 
-	// --------------------------------------------------
-	{
-		cout << "Test of n default constructor:" << endl;
-		SelfMadeSTL::vector<int> self_n_pod(1024);
-		basic_test(self_n_pod);
-		element_test(self_n_pod);
-		cout << "Here is the reference:" << endl;
-		std::vector<int> std_nsame_pod(1024);
-		basic_test(std_nsame_pod);
-		element_test(std_nsame_pod);
-	}
-	cout << endl;
-
-	// --------------------------------------------------
-	{
-		cout << "Test of copy constructor:" << endl;
-		SelfMadeSTL::vector<complex<double>> self_copying(1024, complex<double>(1024, 4096));
-		SelfMadeSTL::vector<complex<double>> self_copied(self_copying);
-		basic_test(self_copied);
-		element_test(self_copied);
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_copying(1024, complex<double>(1024, 4096));
-		std::vector<complex<double>> std_copied(std_copying);
-		basic_test(std_copied);
-		element_test(std_copied);
-	}
-	cout << endl;
-
-	// --------------------------------------------------
-	{
-		complex<double>* arr = new complex<double>[1024];
-		cout << "Test of iterator constructor:" << endl;
-		SelfMadeSTL::vector<complex<double>> self_it(arr, arr + 1024);
-		basic_test(self_it);
-		element_test(self_it);
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_it(arr, arr + 1024);
-		basic_test(std_it);
-		element_test(std_it);
-		cout << std::boolalpha << SelfMadeSTL::container_equal(self_it, std_it) << endl;
-		delete[] arr;
-	}
-	cout << endl;
-
-	// --------------------------------------------------
-	{
-		complex<double>* arr = new complex<double>[1024];
-		cout << "Test of operator= :" << endl;
-		SelfMadeSTL::vector<complex<double>> self_it(arr, arr + 1024);
-		SelfMadeSTL::vector<complex<double>> self_copy = self_it;
-		basic_test(self_copy);
-		element_test(self_copy);
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_it(arr, arr + 1024);
-		std::vector<complex<double>> std_copy = std_it;
-		basic_test(std_copy);
-		element_test(std_copy);
-		delete[] arr;
-	}
-	cout << endl;
-
-	// --------------------------------------------------
-	{
-		complex<double>* arr = new complex<double>[1024];
-		for (size_t i = 0; i < 1024; ++i) {
-			arr[i] = complex<double>(uniform_double(rng), uniform_double(rng));
-		}
-		cout << "Test of functions:" << endl;
-		SelfMadeSTL::vector<complex<double>> self_func(arr, arr + 128);
-		basic_test(self_func);
-		for (size_t i = 128; i < 256; ++i) {
-			self_func.push_back(arr[i]);
-		}
-		self_func.insert(self_func.begin(), arr + 256, arr + 384);
-		basic_test(self_func);
-		self_func.shrink_to_fit();
-		basic_test(self_func);
-		element_test(self_func);
-		self_func.resize(256);
-		basic_test(self_func);
-		element_test(self_func);
-		for (size_t i = 384; i < 1024; ++i) {
-			self_func.push_back(arr[i]);
-		}
-		basic_test(self_func);
-		element_test(self_func);
-		self_func.clear();
-		basic_test(self_func);
-
-		cout << "Here is the reference:" << endl;
-		std::vector<complex<double>> std_func(arr, arr + 128);
-		basic_test(std_func);
-		for (size_t i = 128; i < 256; ++i) {
-			std_func.push_back(arr[i]);
-		}
-		std_func.insert(std_func.begin(), arr + 256, arr + 384);
-		basic_test(std_func);
-		std_func.shrink_to_fit();
-		basic_test(std_func);
-		element_test(std_func);
-		std_func.resize(256);
-		basic_test(std_func);
-		element_test(std_func);
-		for (size_t i = 384; i < 1024; ++i) {
-			std_func.push_back(arr[i]);
-		}
-		basic_test(std_func);
-		element_test(std_func);
-		std_func.clear();
-		basic_test(std_func);
-
-		delete[] arr;
-	}
-	cout << endl;
 	return 0;
 }

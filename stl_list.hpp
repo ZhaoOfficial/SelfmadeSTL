@@ -6,6 +6,7 @@
 #include "stl_iterator.hpp"
 #include "stl_type_traits.hpp"
 #include "stl_uninitialized.hpp"
+#include <iostream>
 
 namespace SelfMadeSTL {
 
@@ -109,12 +110,15 @@ namespace SelfMadeSTL {
 			insert(begin(), n, value);
 		}
 		list(const T* first, const T* last) {
+			init();
 			insert(begin(), first, last);
 		}
 		list(const_iterator first, const_iterator last) {
+			init();
 			insert(begin(), first, last);
 		}
 		list(const list& other) {
+			init();
 			insert(begin(), other.begin(), other.end());
 		}
 		list& operator=(const list& other) {
@@ -137,7 +141,7 @@ namespace SelfMadeSTL {
 		}
 		~list() {
 			clear();
-			delete_node(sentinel);
+			put_node(sentinel);
 		}
 
 		iterator begin() { return sentinel->next; }
@@ -167,11 +171,11 @@ namespace SelfMadeSTL {
 			return n1 == s1 && n2 == s2;
 		}
 
-		bool operator!=(const list& other) {
+		bool operator!=(const list& other) const {
 			return !operator==(other);
 		}
 
-		bool operator<(const list& other) {
+		bool operator<(const list& other) const {
 			return SelfMadeSTL::lexicographical_compare(begin(), end(), other.begin(), other.end());
 		}
 
@@ -206,14 +210,13 @@ namespace SelfMadeSTL {
 			auto next_node = pos.inner->next;
 			pos.inner->prev->next = pos.inner->next;
 			pos.inner->next->prev = pos.inner->prev;
-			delete_node(pos);
+			delete_node(pos.inner);
 			return iterator(next_node);
 		}
 		void erase(iterator first, iterator last) {
 			for (; first != last;) {
 				first = erase(first);
 			}
-			return last;
 		}
 
 		void pop_front() { erase(begin()); }
@@ -264,7 +267,7 @@ namespace SelfMadeSTL {
 			}
 		}
 
-		void unique(const T& value) {
+		void unique() {
 			iterator first = begin();
 			iterator last = end();
 			if (first == last) {
@@ -329,13 +332,17 @@ namespace SelfMadeSTL {
 			iterator last2 = other.end();
 
 			while (first1 != last1 && first2 != last2) {
-				if (*first1 < *first2) {
-					++first1;
-				}
-				else {
+				// no > here, it may only overload <
+				if (*first2 < *first1) {
 					iterator next = first2;
 					transfer(first1, first2, ++next);
-					++first2;
+					// no ++first2 here, because first2 is after first1 now
+					// which means first2 is on this list
+					first2 = next;
+				}
+				else {
+					// if the same, list1 first
+					++first1;
 				}
 			}
 			if (first2 != last2) {
@@ -351,13 +358,13 @@ namespace SelfMadeSTL {
 			iterator last2 = other.end();
 
 			while (first1 != last1 && first2 != last2) {
-				if (comp(*first1, *first2)) {
-					++first1;
-				}
-				else {
+				if (comp(*first2, *first1)) {
 					iterator next = first2;
 					transfer(first1, first2, ++next);
-					++first2;
+					first2 = next;
+				}
+				else {
+					++first1;
 				}
 			}
 			if (first2 != last2) {
@@ -378,12 +385,12 @@ namespace SelfMadeSTL {
 			}
 		}
 
-		// quick sort
+		// merge sort
 		void sort() {
 			// do nothing if size() is 0 or 1
 			if (sentinel->next != sentinel && sentinel->next->next != sentinel) {
 				list carry;
-				// 2 ^ 64 size list
+				// upper limit 2 ^ 64
 				list counter[64];
 
 				int fill = 0;
