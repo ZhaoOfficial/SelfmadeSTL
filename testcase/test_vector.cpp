@@ -15,22 +15,6 @@ using std::default_random_engine;
 using std::uniform_real_distribution;
 using std::numeric_limits;
 
-template <typename T>
-void basic_test(T& vec) {
-	cout << "size = " << vec.size() << ", "
-		<< "capacity = " << vec.capacity() << ", "
-		<< std::boolalpha
-		<< "is empty = " << vec.empty() << endl;
-}
-
-template <typename T>
-void element_test(T& vec) {
-	cout << "The first is : " << vec.front() << ", "
-		<< "The middle is : " << vec[vec.size() / 2] << ", "
-		<< "The last is : " << vec.back() << endl;
-
-}
-
 int main(int argc, char* argv[]) {
 	// initialize
 	const size_t pod_size = 100000;

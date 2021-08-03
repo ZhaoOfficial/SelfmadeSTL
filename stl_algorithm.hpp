@@ -1,5 +1,5 @@
-#ifndef _ALGORITHM_H
-#define _ALGORITHM_H
+#ifndef _ALGORITHM_H_
+#define _ALGORITHM_H_
 
 #include <cstdlib>
 #include <memory>
@@ -57,6 +57,7 @@ namespace SelfMadeSTL {
 
 	// reversely copy the value in [`first`, `last`) to container
 	// end with `output` (exclusive)
+	// O(n)
 	template <typename BidirectionalIterator>
 	BidirectionalIterator copy_backward(BidirectionalIterator first, BidirectionalIterator last, BidirectionalIterator output) {
 		if (first == last)
@@ -71,6 +72,7 @@ namespace SelfMadeSTL {
 
 	// check if it is the same between [`first1`, `last1`) 
 	// and an iterator start from `first2`
+	// O(n)
 	template <typename InputIterator1, typename InputIterator2>
 	bool equal(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2) {
 		for (; first1 != last1; ++first1, ++first2) {
@@ -81,6 +83,7 @@ namespace SelfMadeSTL {
 		return true;
 	}
 
+	// O(n)
 	template <typename InputIterator1, typename InputIterator2>
 	bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2) {
 		for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
@@ -92,6 +95,7 @@ namespace SelfMadeSTL {
 		return first1 == last1 && first2 != last2;
 	}
 
+	// O(n)
 	template <typename InputIterator1, typename InputIterator2, typename Compare>
 	bool lexicographical_compare(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, Compare comp) {
 		for (; first1 != last1 && first2 != last2; ++first1, ++first2) {
@@ -104,4 +108,4 @@ namespace SelfMadeSTL {
 	}
 }
 
-#endif // !_ALGORITHM_H
+#endif // !_ALGORITHM_H_
