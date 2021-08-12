@@ -7,6 +7,8 @@
 #include "stl_type_traits.hpp"
 #include "stl_uninitialized.hpp"
 
+#include <iostream>
+
 namespace SelfMadeSTL {
 
 	inline size_t deque_buffer_size(size_t n, size_t size) {
@@ -53,49 +55,49 @@ namespace SelfMadeSTL {
 		pointer operator->() const { return curr; }
 		// position difference
 		// this - other
-		difference_type operator-(const iterator& other) const {
-			return difference_type(buffer_size()) * (node - other.node - 1) + 
-			       (curr - first) + (other.last - other.curr);
+		difference_type operator-(const deque_iterator& other) const {
+			return difference_type(buffer_size()) * (this->node - other.node - 1) + 
+			       (this->curr - this->first) + (other.last - other.curr);
 		}
 
 		void set_node(map_pointer new_node) {
-			node = new_node;
-			first = *new_node;
-			last = *new_node + difference_type(buffer_size());
+			this->node = new_node;
+			this->first = *new_node;
+			this->last = *new_node + difference_type(buffer_size());
 		}
 
-		iterator& operator++() {
-			++curr;
-			if (curr == last) {
-				set_node(node + 1);
-				curr = first;
+		deque_iterator& operator++() {
+			++this->curr;
+			if (this->curr == this->last) {
+				set_node(this->node + 1);
+				this->curr = this->first;
 			}
 			return *this;
 		}
-		iterator operator++(int) {
-			iterator temp = *this;
+		deque_iterator operator++(int) {
+			deque_iterator temp = *this;
 			++*this;
 			return temp;
 		}
-		iterator& operator--() {
-			if (curr == first) {
-				set_node(node - 1);
-				curr = last;
+		deque_iterator& operator--() {
+			if (this->curr == this->first) {
+				set_node(this->node - 1);
+				this->curr = this->last;
 			}
-			--curr;
+			--this->curr;
 			return *this;
 		}
-		iterator operator--(int) {
-			iterator temp = *this;
+		deque_iterator operator--(int) {
+			deque_iterator temp = *this;
 			--*this;
 			return temp;
 		}
-		iterator& operator+=(difference_type n) {
-			difference_type pos_offset = n + (curr - first);
+		deque_iterator& operator+=(difference_type n) {
+			difference_type pos_offset = n + (this->curr - this->first);
 			// if it is still in the current buffer
 			// if [0, buffer_size())
 			if (pos_offset >= 0 && pos_offset < difference_type(buffer_size())) {
-				curr += n;
+				this->curr += n;
 			}
 			// if across other buffers
 			else {
@@ -104,21 +106,21 @@ namespace SelfMadeSTL {
 				difference_type node_offset = 
 				pos_offset > 0 ? pos_offset / difference_type(buffer_size())
 				           : -difference_type((-pos_offset - 1) / buffer_size()) - 1;
-				set_node(node + node_offset);
+				set_node(this->node + node_offset);
 				// then adjust the current position
-				curr = first + (pos_offset - node_offset * difference_type(buffer_size()));
+				this->curr = this->first + (pos_offset - node_offset * difference_type(buffer_size()));
 			}
 			return *this;
 		}
-		iterator operator+(difference_type n) {
-			iterator temp = *this;
+		deque_iterator operator+(difference_type n) {
+			deque_iterator temp = *this;
 			return temp += n;
 		}
-		iterator& operator-=(difference_type n) {
+		deque_iterator& operator-=(difference_type n) {
 			return *this += (-n);
 		}
-		iterator operator-(difference_type n) {
-			iterator temp = *this;
+		deque_iterator operator-(difference_type n) {
+			deque_iterator temp = *this;
 			return temp -= n;
 		}
 	
@@ -126,15 +128,15 @@ namespace SelfMadeSTL {
 			return *((*this + n));
 		}
 
-		bool operator==(const iterator& other) const {
-			return curr == other.curr;
+		bool operator==(const deque_iterator& other) const {
+			return this->curr == other.curr;
 		}
-		bool operator!=(const iterator& other) const {
-			return !(*this == other);
+		bool operator!=(const deque_iterator& other) const {
+			return this->curr != other.curr;
 		}
-		bool operator<(const iterator& other) const {
-			return (node == other.node) ? 
-			       (curr < other.curr) : (node < other.node);
+		bool operator<(const deque_iterator& other) const {
+			return (this->node == other.node) ?
+			       (this->curr < other.curr) : (this->node < other.node);
 		}
 
 	};
@@ -159,26 +161,26 @@ namespace SelfMadeSTL {
 		typedef T               value_type;
 		typedef T*              pointer;
 		typedef T&              reference;
-		typedef size_t          size_type;
-		typedef ptrdiff_t       difference_type;
 		typedef const T*        const_pointer;
 		typedef const T&        const_reference;
+		typedef size_t          size_type;
+		typedef ptrdiff_t       difference_type;
 
 		typedef deque_iterator<T, T&, T*, BufSize> iterator;
 		typedef deque_iterator<T, const T&, const T*, BufSize> const_iterator;
 
 	protected:
-		iterator start;
-		iterator finish;
-		size_type map_size;
-		T** map;
-
-		enum class MapSize { MAP_SIZE = 8 };
-
 		typedef simple_alloc<T, Alloc> node_allocator;
 		typedef simple_alloc<T*, Alloc> map_allocator;
 		typedef pointer*                  map_pointer;
 		
+		iterator start;
+		iterator finish;
+		size_type map_size;
+		map_pointer map;
+
+		enum class MapSize { MAP_SIZE = 8 };
+
 		// memory management
 
 		map_pointer allocate_map(size_t n) {
@@ -199,11 +201,11 @@ namespace SelfMadeSTL {
 				// copy [start, finish) to [new_start_node, new_start_node + old_nodes_num)
 				if (new_start_node < start.node) {
 					// move forward
-					copy(start.node, finish.node + 1, new_start_node)
+					copy(start.node, finish.node + 1, new_start_node);
 				}
 				else {
 					// move backward
-					copy_backward(start.node, finish.node + 1, new_start_node + old_nodes_num)
+					copy_backward(start.node, finish.node + 1, new_start_node + old_nodes_num);
 				}
 			}
 			else {
@@ -219,8 +221,8 @@ namespace SelfMadeSTL {
 		}
 		void initialize_map(size_type elements_num) {
 			size_type nodes_num = elements_num / deque_buffer_size(BufSize, sizeof(T)) + 1;
-			this.map_size = std::max(MapSize::MAP_SIZE, nodes_num + 2);
-			this.map = allocate_map(map_size);
+			this->map_size = std::max((size_type)(MapSize::MAP_SIZE), nodes_num + 2);
+			this->map = allocate_map(map_size);
 
 			map_pointer start_node = map + (map_size - nodes_num) / 2;
 			map_pointer finish_node = start_node + nodes_num;
@@ -228,27 +230,27 @@ namespace SelfMadeSTL {
 			try {
 				create_nodes(start_node, finish_node);
 			}
-			catch (const std::exception& e) {
+			catch (const std::exception&) {
 				deallocate_map(map, map_size);
 				map = nullptr;
-				map_size = nullptr;
+				map_size = 0;
 			}
 
 			start.set_node(start_node);
-			start.curr = start_node.first;
-			finish.set_node(finish_node);
-			finish.curr = finish_node.first + elements_num % deque_buffer_size(BufSize, sizeof(T));
+			start.curr = start.first;
+			finish.set_node(finish_node - 1);
+			finish.curr = finish.first + elements_num % deque_buffer_size(BufSize, sizeof(T));
 		}
 
-		iterator reserve_map_at_back(size_type node_to_add = 1) {
+		void reserve_map_at_back(size_type node_to_add = 1) {
 			// not enough space at back of the map
-			if (node_to_add + 1 > map_size - (finish.node - map)) {
+			if (node_to_add + 1 > this->map_size - (this->finish.node - this->map)) {
 				reallocate_map(node_to_add, false);
 			}
 			// if enough, then append elements
 		}
-		iterator reserve_map_at_front(size_type node_to_add = 1) {
-			if (node_to_add + 1 > size_type(start.node - map)) {
+		void reserve_map_at_front(size_type node_to_add = 1) {
+			if (node_to_add > size_type(this->start.node - this->map)) {
 				reallocate_map(node_to_add, true);
 			}
 		}
@@ -263,50 +265,36 @@ namespace SelfMadeSTL {
 			map_pointer curr_node = start_node;
 			try {
 				for ( ; curr_node != finish_node; ++curr_node) {
-					curr_node = allocate_node();
+					*curr_node = allocate_node();
 				}
 			}
-			catch (const std::exception& e) {
+			catch (const std::exception&) {
 				destroy_nodes(start_node, curr_node);
 			}
 		}
 		void destroy_nodes(map_pointer start_node, map_pointer finish_node) {
-			for (map_pointer curr_node = start_node; curr_node != finish; ++curr_node) {
-				deallocate_node(curr_node);
+			for (map_pointer curr_node = start_node; curr_node != finish_node; ++curr_node) {
+				deallocate_node(*curr_node);
 			}
 		}
 
 		void fill_initialize(const value_type& value) {
-			map_pointer curr_node = start.node;
+			map_pointer curr_node = this->start.node;
 			try {
-				for (; curr_node < finish.node; ++curr_node) {
+				for (; curr_node < this->finish.node; ++curr_node) {
 					// fill the buffer
 					uninitialized_fill(*curr_node, *curr_node + deque_buffer_size(BufSize, sizeof(T)), value);
 				}
 				// fill last buffer
-				uninitialized_fill(finish.first, finish.curr, value);
+				uninitialized_fill(this->finish.first, this->finish.curr, value);
 			}
-			catch(const std::exception& e) {
-				destroy(start, iterator(*curr_node, curr_node));
+			catch(const std::exception&) {
+				destroy(this->start, iterator(*curr_node, curr_node));
 			}
 		}
 
-		iterator reserve_element_at_front(size_type n) {
-			size_type vacancy = start.curr - start.first;
-			if (n > vacancy) {
-				new_elements_at_front(n - vacancy);
-			}
-			return start - difference_type(n);
-		}
-		iterator reserve_element_at_back(size_type n) {
-			size_type vacancy = (finish.last - finish.first) - 1;
-			if (n > vacancy) {
-				new_elements_at_back(n - vacancy);
-			}
-			return finish + difference_type(n);
-		}
 		void new_elements_at_front(size_type n) {
-			size_type new_nodes = (n - 1) / deque_buffer_size(BufSize, sizeof(T)) + 1
+			size_type new_nodes = (n - 1) / deque_buffer_size(BufSize, sizeof(T)) + 1;
 			reserve_map_at_front(new_nodes);
 			size_type i;
 			try {
@@ -314,7 +302,7 @@ namespace SelfMadeSTL {
 					*(start.node - i) = allocate_node();
 				}
 			}
-			catch (const std::exception& e) {
+			catch (const std::exception&) {
 				for (size_type j = 1; j < i; ++j) {
 					deallocate_node(*(start.node - j));
 				}
@@ -329,82 +317,96 @@ namespace SelfMadeSTL {
 					*(finish.node + i) = allocate_node();
 				}
 			}
-			catch (const std::exception& e) {
+			catch (const std::exception&) {
 				for (size_type j = 1; j < i; ++j) {
 					deallocate_node(*(finish.node + j));
 				}
 			}
 		}
+		iterator reserve_element_at_front(size_type n) {
+			size_type vacancy = this->start.curr - this->start.first;
+			if (n > vacancy) {
+				new_elements_at_front(n - vacancy);
+			}
+			return this->start - difference_type(n);
+		}
+		iterator reserve_element_at_back(size_type n) {
+			size_type vacancy = (this->finish.last - this->finish.curr) - 1;
+			if (n > vacancy) {
+				new_elements_at_back(n - vacancy);
+			}
+			return this->finish + difference_type(n);
+		}
 
 		void push_back_aux(const value_type& value) {
 			value_type value_copy = value;
 			reserve_map_at_back();
-			*(finish.curr + 1) = allocate_node();
+			*(this->finish.node + 1) = allocate_node();
 			try {
-				construct(finish.curr, value_copy);
-				finish.set_node(finish.node + 1);
-				finish.curr = finish.first;
+				construct(this->finish.curr, value_copy);
+				this->finish.set_node(this->finish.node + 1);
+				this->finish.curr = this->finish.first;
 			}
-			catch (const std::exception& e) {
-				deallocate_node(*(finish.node + 1));
+			catch (const std::exception&) {
+				deallocate_node(*(this->finish.node + 1));
 			}
 		}
 		void push_back_aux() {
 			reserve_map_at_back();
-			*(finish.curr + 1) = allocate_node();
+			*(this->finish.node + 1) = allocate_node();
 			try {
-				construct(finish.curr);
-				finish.set_node(finish.node + 1);
-				finish.curr = finish.first;
+				construct(this->finish.curr);
+				this->finish.set_node(this->finish.node + 1);
+				this->finish.curr = this->finish.first;
 			}
-			catch (const std::exception& e) {
-				deallocate_node(*(finish.node + 1));
+			catch (const std::exception) {
+				deallocate_node(*(this->finish.node + 1));
 			}
 		}
 		void push_front_aux(const value_type& value) {
 			value_type value_copy = value;
 			reserve_map_at_front();
-			*(start - 1) = allocate_node();
+			*(this->start.node - 1) = allocate_node();
 			try {
-				start.set_node(start.node - 1);
-				start.curr = start.last - 1;
-				construct(start.curr, value_copy);
+				this->start.set_node(this->start.node - 1);
+				this->start.curr = this->start.last - 1;
+				construct(this->start.curr, value_copy);
 			}
-			catch(const std::exception& e) {
-				++start;
-				deallocate_node(*(start.node - 1));
+			catch(const std::exception&) {
+				++this->start;
+				deallocate_node(*(this->start.node - 1));
 			}
 		}
 		void push_front_aux() {
 			reserve_map_at_front();
-			*(start - 1) = allocate_node();
+			*(this->start.node - 1) = allocate_node();
 			try {
-				start.set_node(start.node - 1);
-				start.curr = start.last - 1;
-				construct(start.curr);
+				this->start.set_node(this->start.node - 1);
+				this->start.curr = this->start.last - 1;
+				construct(this->start.curr);
 			}
-			catch(const std::exception& e) {
-				++start;
-				deallocate_node(*(start.node - 1));
+			catch(const std::exception) {
+				++this->start;
+				deallocate_node(*(this->start.node - 1));
 			}
 		}
 		void pop_back_aux() {
-			deallocate_node(finish.first);
-			finish.set_node(finish.node - 1);
-			finish.curr = finish.last - 1;
-			destory(finish.curr);
+			deallocate_node(this->finish.first);
+			this->finish.set_node(this->finish.node - 1);
+			this->finish.curr = this->finish.last - 1;
+			destory(this->finish.curr);
 		}
 		void pop_front_aux() {
-			destory(start.curr);
-			deallocate_node(start.first);
-			start.set_node(start.node + 1);
-			start.curr = start.first;
+			destory(this->start.curr);
+			deallocate_node(this->start.first);
+			this->start.set_node(this->start.node + 1);
+			this->start.curr = this->start.first;
 		}
 		
 		iterator insert_aux(iterator pos, const value_type& value) {
 			const difference_type element_before = pos - start;
 			value_type value_copy = value;
-			if (element_before < (size() / 2)) {
+			if (element_before < (difference_type)(size() / 2)) {
 				push_front(front());
 				// map may be extended and changed memory position
 				// here we need to insert after `pos`
@@ -426,7 +428,7 @@ namespace SelfMadeSTL {
 			const difference_type element_after = finish - pos;
 			value_type value_copy = value;
 			// less at before
-			if (element_before < size() / 2) {
+			if (element_before < (difference_type)(size() / 2)) {
 				iterator new_start = reserve_element_at_front(n);
 				iterator old_start = start;
 				pos = start + element_before;
@@ -450,7 +452,7 @@ namespace SelfMadeSTL {
 					}
 					start = new_start;
 				}
-				catch (const std::exception& e) {
+				catch (const std::exception&) {
 					destroy_nodes(new_start.node, old_start.node);
 				}
 			}
@@ -474,7 +476,7 @@ namespace SelfMadeSTL {
 					}
 					finish = new_finish;
 				}
-				catch (const std::exception& e) {
+				catch (const std::exception&) {
 					destroy_nodes(old_finish.node + 1, new_finish.node + 1);
 				}
 			}
@@ -482,7 +484,7 @@ namespace SelfMadeSTL {
 		void insert_aux(iterator pos, const value_type* first, const value_type* last, size_type n) {
 			const difference_type element_before = pos - start;
 			const difference_type element_after = finish - pos;
-			if (element_before < (size() / 2)) {
+			if (element_before < (difference_type)(size() / 2)) {
 				iterator new_start = reserve_element_at_front(n);
 				iterator old_start = start;
 				pos = start + element_before;
@@ -502,7 +504,7 @@ namespace SelfMadeSTL {
 					}
 					start = new_start;
 				}
-				catch (const std::exception& e) {
+				catch (const std::exception&) {
 					destroy_nodes(new_start.node, old_start.node);
 				}
 			}
@@ -525,7 +527,7 @@ namespace SelfMadeSTL {
 					}
 					finish = new_finish;
 				}
-				catch (const std::exception& e) {
+				catch (const std::exception&) {
 					destroy_nodes(old_finish.node + 1, new_finish.node + 1);
 				}
 			}
@@ -592,77 +594,74 @@ namespace SelfMadeSTL {
 			fill_initialize(value);
 		}
 		deque(const deque& other) {
-			initialize_map(other.map_size);
+			initialize_map(other.size());
 			SelfMadeSTL::uninitialized_copy(
-				other.begin(), other.end(), start
+				other.begin(), other.end(), this->start
 			);
 		}
 		deque(const value_type* first, const value_type* last) {
 			initialize_map(last - first);
-			uninitialized_copy(first, last, start);
+			uninitialized_copy(first, last, this->start);
 		}
 		deque(const_iterator first, const_iterator last) {
 			initialize_map(last - first);
-			uninitialized_copy(first, last, start);
+			uninitialized_copy(first, last, this->start);
 		}
 		deque& operator=(const deque& other) {
-			const size_type len = this.size();
+			const size_type len = this->size();
 			if (this != &other) {
 				if (len >= other.size()) {
-					iterator new_finish = copy(other.begin(), other.end(), start);
-					erase(new_finish, finish);
+					iterator new_finish = copy(other.begin(), other.end(), this->start);
+					erase(new_finish, this->finish);
 				}
 				else {
 					const_iterator mid = other.begin() + difference_type(len);
-					copy(other.begin(), mid, start);
-					insert(finish, mid, other.end())
+					copy(other.begin(), mid, this->start);
+					insert(this->finish, mid, other.end());
 				}
 			}
 			return *this;
 		}
 		~deque() {
-			destory(start, finish);
-			if (map != nullptr) {
-				destroy_nodes(start.node, finish.node + 1);
-				deallocate_map(map, map_size);
-			}
+			clear();
+			deallocate_map(map, map_size);
 		}
 
-		iterator begin() { return start; }
-		iterator end() { return finish; }
-		const_iterator begin() const { return start; }
-		const_iterator end() const { return finish; }
-		const_iterator cbegin() const { return start; }
-		const_iterator cend() const { return finish; }
+		iterator begin() { return this->start; }
+		iterator end() { return this->finish; }
+		const_iterator begin() const { return this->start; }
+		const_iterator end() const { return this->finish; }
+		const_iterator cbegin() const { return this->start; }
+		const_iterator cend() const { return this->finish; }
 
-		reference front() { return *start; }
-		reference back() { return *(finish - 1); }
-		const_reference front() const { return *start; }
-		reference back() { return *(finish - 1); }
+		reference front() { return *this->start; }
+		reference back() { return *(this->finish - 1); }
+		const_reference front() const { return *this->start; }
+		const_reference back() const { return *(this->finish - 1); }
 		reference operator[](size_t idx) {
-			return start[difference_type(idx)];
+			return this->start[difference_type(idx)];
 		}
 		const_reference operator[](size_t idx) const {
-			return start[difference_type(idx)];
+			return this->start[difference_type(idx)];
 		}
 	
-		size_type size() const { return finish - start; }
-		bool empty() const { return start == finish; }
+		size_type size() const { return this->finish - this->start; }
+		bool empty() const { return this->start == this->finish; }
 
 		void push_back(const value_type& value) {
 			// if not at the last position of current buffer
-			if (finish.curr != finish.last - 1) {
-				construct(finish.curr, value);
-				++finish.curr;
+			if (this->finish.curr != this->finish.last - 1) {
+				construct(this->finish.curr, value);
+				++this->finish.curr;
 			}
 			else {
 				push_back_aux(value);
 			}
 		}
 		void push_back() {
-			if (finish.curr != finish.last - 1) {
-				construct(finish.curr);
-				++finish.curr;
+			if (this->finish.curr != this->finish.last - 1) {
+				construct(this->finish.curr);
+				++this->finish.curr;
 			}
 			else {
 				push_back_aux();
@@ -670,66 +669,66 @@ namespace SelfMadeSTL {
 		}
 		void push_front(const value_type& value) {
 			// if not at the first position of current buffer
-			if (start.curr != start.first) {
-				construct(start.curr - 1, value);
-				--start.curr;
+			if (this->start.curr != this->start.first) {
+				construct(this->start.curr - 1, value);
+				--this->start.curr;
 			}
 			else {
 				push_front_aux(value);
 			}
 		}
 		void push_front() {
-			if (start.curr != start.first) {
-				construct(start.curr - 1);
-				--start.curr;
+			if (this->start.curr != this->start.first) {
+				construct(this->start.curr - 1);
+				--this->start.curr;
 			}
 			else {
 				push_front_aux();
 			}
 		}
-		void pop_front() {
-			if (start.curr != start.last - 1) {
-				destory(start.curr);
-				++start.curr;
-			}
-			else {
-				pop_front_aux();
-			}
-		}
 		void pop_back() {
-			if (finish.curr != finish.first) {
-				--finish.curr;
-				destory(finish.curr);
+			if (this->finish.curr != this->finish.first) {
+				--this->finish.curr;
+				destory(this->finish.curr);
 			}
 			else {
 				pop_back_aux();
 			}
 		}
+		void pop_front() {
+			if (this->start.curr != this->start.last - 1) {
+				destory(this->start.curr);
+				++this->start.curr;
+			}
+			else {
+				pop_front_aux();
+			}
+		}
 
 		// insert at the front of the `pos`
 		iterator insert(iterator pos, const value_type& value = value_type()) {
-			if (pos.curr == start.curr) {
-				push_back(value);
-				return start;
+			if (pos.curr == this->start.curr) {
+				push_front(value);
+				return this->start;
 			}
-			else if (pos.curr == finish.curr) {
+			else if (pos.curr == this->finish.curr) {
 				push_back(value);
-				return finish - 1;
+				return this->finish - 1;
 			}
 			else {
 				return insert_aux(pos, value);
 			}
 		}
 		void insert(iterator pos, size_type n, const value_type& value = value_type()) {
-			if (pos.curr == start.curr) {
+			if (pos.curr == this->start.curr) {
 				iterator new_start = reserve_element_at_front(n);
-				uninitialized_fill(new_start, start, value);
-				start = new_start;
+				uninitialized_fill(new_start, this->start, value);
+				this->start = new_start;
 			}
 			else if (pos.curr == finish.curr) {
 				iterator new_finish = reserve_element_at_back(n);
-				uninitialized_fill(finish, new_finish, value);
-				finish = new_finish;
+				uninitialized_fill(this->finish, new_finish, value);
+				this->finish = new_finish;
 			}
 			else {
 				insert_aux(pos, n, value);
@@ -737,24 +736,24 @@ namespace SelfMadeSTL {
 		}
 		void insert(iterator pos, const value_type* first, const value_type* last) {
 			size_type n = last - first;
-			if (pos.curr == start.curr) {
+			if (pos.curr == this->start.curr) {
 				iterator new_start = reserve_element_at_front(n);
 				try {
 					uninitialized_copy(first, last, new_start);
-					start = new_start;
+					this->start = new_start;
 				}
-				catch (const std::exception& e) {
-					destroy_nodes(new_start.node, start.node);
+				catch (const std::exception&) {
+					destroy_nodes(new_start.node, this->start.node);
 				}
 			}
-			else if (pos.curr == finish.curr) {
+			else if (pos.curr == this->finish.curr) {
 				iterator new_finish = reserve_element_at_back(n);
 				try {
-					uninitialized_copy(first, last, finish);
-					finish = new_finish;
+					uninitialized_copy(first, last, this->finish);
+					this->finish = new_finish;
 				}
-				catch (const std::exception& e) {
-					destroy_nodes(finish.node + 1, new_finish.node + 1);
+				catch (const std::exception&) {
+					destroy_nodes(this->finish.node + 1, new_finish.node + 1);
 				}
 			}
 			else {
@@ -763,24 +762,24 @@ namespace SelfMadeSTL {
 		}
 		void insert(iterator pos, const_iterator first, const_iterator last) {
 			size_type n = last - first;
-			if (pos.curr == start.curr) {
+			if (pos.curr == this->start.curr) {
 				iterator new_start = reserve_element_at_front(n);
 				try {
 					uninitialized_copy(first, last, new_start);
-					start = new_start;
+					this->start = new_start;
 				}
 				catch (const std::exception& e) {
-					destroy_nodes(new_start.node, start.node);
+					destroy_nodes(new_start.node, this->start.node);
 				}
 			}
-			else if (pos.curr == finish.curr) {
+			else if (pos.curr == this->finish.curr) {
 				iterator new_finish = reserve_element_at_back(n);
 				try {
-					uninitialized_copy(first, last, finish);
-					finish = new_finish;
+					uninitialized_copy(first, last, this->finish);
+					this->finish = new_finish;
 				}
 				catch (const std::exception& e) {
-					destroy_nodes(finish.node + 1, new_finish.node + 1);
+					destroy_nodes(this->finish.node + 1, new_finish.node + 1);
 				}
 			}
 			else {
@@ -790,77 +789,78 @@ namespace SelfMadeSTL {
 
 		iterator erase(iterator pos) {
 			iterator next = pos;
-			next++;
-			difference_type dist = pos - start;
-			if (dist < (size() / 2)) {
-				copy_backward(start, finish, next);
+			++next;
+			difference_type dist = pos - this->start;
+			if (dist < (difference_type)(this->size() / 2)) {
+				copy_backward(this->start, pos, next);
 				pop_front();
 			}
 			else {
-				copy(next, finish, pos);
+				copy(next, this->finish, pos);
 				pop_back();
 			}
-			return start + dist;
+			return this->start + dist;
 		}
 		iterator erase(iterator first, iterator last) {
-			if (first == start && last == finish) {
+			if (first == this->start && last == this->finish) {
 				clear();
-				return finish;
+				return this->finish;
 			}
 
 			difference_type n = last - first;
-			difference_type element_before = first - start;
-			if (element_before < (size() - n) / 2) {
+			difference_type element_before = first - this->start;
+			if (element_before < (difference_type)((size() - n) / 2)) {
 				// move [start, first) to [start + n, last)
-				copy_backward(start, first, last);
-				iterator new_start = start + n;
-				destory(start, new_start);
-				destroy_nodes(start.node, new_start.node);
-				start = new_start;
+				copy_backward(this->start, first, last);
+				iterator new_start = this->start + n;
+				destory(this->start, new_start);
+				destroy_nodes(this->start.node, new_start.node);
+				this->start = new_start;
 			}
 			else {
 				// move [last, finish) to [first, finish - n)
-				copy(last, finish, first);
-				iterator new_finish = finish - n;
-				destory(new_finish, finish);
-				destroy_nodes(new_finish.node + 1, finish.node + 1);
-				finish = new_finish;
+				copy(last, this->finish, first);
+				iterator new_finish = this->finish - n;
+				destory(new_finish, this->finish);
+				destroy_nodes(new_finish.node + 1, this->finish.node + 1);
+				this->finish = new_finish;
 			}
-			return start + element_before;
+			return this->start + element_before;
 		}
 
 		void resize(size_type new_size, const value_type& value = value_type()) {
-			const value_type len = size();
+			const size_t len = this->size();
 			if (new_size < len) {
-				erase(start + new_size, finish);
+				erase(this->start + new_size, this->finish);
 			}
 			else {
-				insert(finish, new_size - len, value);
+				insert(this->finish, new_size - len, value);
 			}
 		}
 
 		void clear() {
-			for (map_pointer curr_node = start.node + 1; curr_node < finish.node; ++curr_node) {
+			for (map_pointer curr_node = this->start.node + 1; curr_node < this->finish.node; ++curr_node) {
 				destory(*curr_node, *curr_node + deque_buffer_size(BufSize, sizeof(T)));
 				deallocate_node(*curr_node);
 			}
 
-			if (start.node != finish.node) {
-				destory(start.curr, start.last);
-				destory(finish.first, finish.curr);
-				deallocate_node(finish.first);
+			if (this->start.node != this->finish.node) {
+				destory(this->start.curr, this->start.last);
+				destory(this->finish.first, this->finish.curr);
+				deallocate_node(this->finish.first);
 			}
 			else {
-				destory(start.curr, finish.curr);
+				destory(this->start.curr, this->finish.curr);
 			}
-			finish = start;
+
+			this->finish = this->start;
 		}
 
 		void swap(deque& other) {
-			std::swap(start, other.start);
-			std::swap(finish, other.finish);
-			std::swap(map, other.map);
-			std::swap(map_size, other.map_size);
+			std::swap(this->start, other.start);
+			std::swap(this->finish, other.finish);
+			std::swap(this->map, other.map);
+			std::swap(this->map_size, other.map_size);
 		}
 
 		bool operator==(const deque& other) const {

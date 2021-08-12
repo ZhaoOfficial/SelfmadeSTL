@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
 			<< "front() = " << self_default_pod2.front() << ", "
 			<< "back() = " << self_default_pod2.back() << "\n";
 
-		self_default_pod2.resize(pod_size - 1);
+		self_default_pod2.resize(pod_size / 2);
 		cout << "resize: size = " << self_default_pod2.size() << ", "
 			<< "capacity = " << self_default_pod2.capacity() << ", "
 			<< "front() = " << self_default_pod2.front() << ", "
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 			<< "front() = " << std_default_pod2.front() << ", "
 			<< "back() = " << std_default_pod2.back() << "\n";
 
-		std_default_pod2.resize(pod_size - 1);
+		std_default_pod2.resize(pod_size / 2);
 		cout << "resize: size = " << std_default_pod2.size() << ", "
 			<< "capacity = " << std_default_pod2.capacity() << ", "
 			<< "front() = " << std_default_pod2.front() << ", "
@@ -215,7 +215,7 @@ int main(int argc, char* argv[]) {
 			<< "back() = " << self_default_npod2.back().ptr->real() << ", "
 			<< self_default_npod2.back().ptr->imag() << "\n";
 
-		self_default_npod2.resize(npod_size - 1);
+		self_default_npod2.resize(npod_size / 2);
 		cout << "resize: size = " << self_default_npod2.size() << ", "
 			<< "capacity = " << self_default_npod2.capacity() << ", "
 			<< "front() = " << self_default_npod2.front().ptr->real() << ", "
@@ -300,7 +300,7 @@ int main(int argc, char* argv[]) {
 			<< "back() = " << std_default_npod2.back().ptr->real() << ", "
 			<< std_default_npod2.back().ptr->imag() << "\n";
 
-		std_default_npod2.resize(npod_size - 1);
+		std_default_npod2.resize(npod_size / 2);
 		cout << "resize: size = " << std_default_npod2.size() << ", "
 			<< "capacity = " << std_default_npod2.capacity() << ", "
 			<< "front() = " << std_default_npod2.front().ptr->real() << ", "
