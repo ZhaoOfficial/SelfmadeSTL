@@ -17,6 +17,11 @@ public:
 		ptr->real(other.ptr->real());
 		ptr->imag(other.ptr->imag());
 	}
+	Npod(const double& real, const double& imag) {
+		ptr = new std::complex<double>();
+		ptr->real(real);
+		ptr->imag(imag);
+	}
 	Npod& operator=(const Npod& other) {
 		if (this != &other) {
 			ptr->real(other.ptr->real());
@@ -31,10 +36,15 @@ public:
 		return this->ptr->real() == other.ptr->real() && this->ptr->imag() == other.ptr->imag();
 	}
 	bool operator!=(const Npod& other) const {
-		return !operator==(other);
+		return this->ptr->real() != other.ptr->real() || this->ptr->imag() != other.ptr->imag();
 	}
 	bool operator<(const Npod& other) const {
-		return this->ptr->real() < other.ptr->real() && this->ptr->imag() < other.ptr->imag();
+		return this->ptr->imag() * this->ptr->imag() + other.ptr->imag() * other.ptr->imag() < 
+		other.ptr->real() * other.ptr->real() + other.ptr->imag() * other.ptr->imag();
+	}
+	bool operator>(const Npod& other) const {
+		return this->ptr->imag() * this->ptr->imag() + other.ptr->imag() * other.ptr->imag() > 
+		other.ptr->real() * other.ptr->real() + other.ptr->imag() * other.ptr->imag();
 	}
 
 	std::complex<double>* ptr;

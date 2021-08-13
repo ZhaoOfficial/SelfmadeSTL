@@ -7,8 +7,6 @@
 #include "stl_type_traits.hpp"
 #include "stl_uninitialized.hpp"
 
-#include <iostream>
-
 namespace SelfMadeSTL {
 
 	inline size_t deque_buffer_size(size_t n, size_t size) {

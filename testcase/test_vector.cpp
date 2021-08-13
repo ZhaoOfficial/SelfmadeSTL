@@ -3,6 +3,7 @@
 #include <vector>
 #include <complex>
 #include <random>
+#include <climits>
 
 #include "../stl_vector.hpp"
 #include "../stl_type_traits.hpp"
