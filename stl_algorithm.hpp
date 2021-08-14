@@ -7,7 +7,7 @@
 #include "stl_iterator.hpp"
 #include "stl_type_traits.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
 	// fill the same `value` in [`first`, `last`)
 	// O(n)

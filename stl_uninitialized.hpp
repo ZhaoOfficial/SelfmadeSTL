@@ -5,7 +5,7 @@
 #include "stl_construct.hpp"
 #include "stl_type_traits.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
     // uninitialized_copy
     // separation of allocation and construction

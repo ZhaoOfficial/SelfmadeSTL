@@ -17,6 +17,9 @@ public:
 		ptr->real(other.ptr->real());
 		ptr->imag(other.ptr->imag());
 	}
+	Npod(const Npod&& other) {
+		ptr = other.ptr;
+	}
 	Npod(const double& real, const double& imag) {
 		ptr = new std::complex<double>();
 		ptr->real(real);
@@ -39,11 +42,11 @@ public:
 		return this->ptr->real() != other.ptr->real() || this->ptr->imag() != other.ptr->imag();
 	}
 	bool operator<(const Npod& other) const {
-		return this->ptr->imag() * this->ptr->imag() + other.ptr->imag() * other.ptr->imag() < 
+		return this->ptr->real() * this->ptr->real() + this->ptr->imag() * this->ptr->imag() <
 		other.ptr->real() * other.ptr->real() + other.ptr->imag() * other.ptr->imag();
 	}
 	bool operator>(const Npod& other) const {
-		return this->ptr->imag() * this->ptr->imag() + other.ptr->imag() * other.ptr->imag() > 
+		return this->ptr->real() * this->ptr->real() + this->ptr->imag() * this->ptr->imag() >
 		other.ptr->real() * other.ptr->real() + other.ptr->imag() * other.ptr->imag();
 	}
 
@@ -51,7 +54,7 @@ public:
 };
 
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
 	template <typename Container>
 	void print_container(Container& c, const std::string& name) {

@@ -7,7 +7,7 @@
 #include "stl_type_traits.hpp"
 #include "stl_uninitialized.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
 	inline size_t deque_buffer_size(size_t n, size_t size) {
 		return n != 0 ? n :
@@ -593,7 +593,7 @@ namespace SelfMadeSTL {
 		}
 		deque(const deque& other) {
 			initialize_map(other.size());
-			SelfMadeSTL::uninitialized_copy(
+			selfmadeSTL::uninitialized_copy(
 				other.begin(), other.end(), this->start
 			);
 		}

@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
 	// testing
 	{
 		cout << "----- Test of POD default constructor and copy constructor -----\n";
-		SelfMadeSTL::vector<double> self_default_pod;
+		selfmadeSTL::vector<double> self_default_pod;
 		cout << std::boolalpha << "is empty? "
 			<< self_default_pod.empty() << "\n";
 
@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 			<< "front() = " << self_default_pod.front() << ", "
 			<< "back() = " << self_default_pod.back() << "\n";
 
-		SelfMadeSTL::vector<double> self_default_pod2(self_default_pod);
+		selfmadeSTL::vector<double> self_default_pod2(self_default_pod);
 		cout << std::boolalpha << "is the same? "
 			<< (self_default_pod == self_default_pod2) << ", "
 			<< (self_default_pod != self_default_pod2) << "\n";
@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
 	cout << endl;
 	{
 		cout << "----- Test of non-POD default constructor and copy constructor -----\n";
-		SelfMadeSTL::vector<Npod> self_default_npod;
+		selfmadeSTL::vector<Npod> self_default_npod;
 		cout << std::boolalpha << "is empty? "
 			<< self_default_npod.empty() << "\n";
 
@@ -194,7 +194,7 @@ int main(int argc, char* argv[]) {
 			<< "back() = " << self_default_npod.back().ptr->real() << ", "
 			<< self_default_npod.back().ptr->imag() << "\n";
 
-		SelfMadeSTL::vector<Npod> self_default_npod2(self_default_npod);
+		selfmadeSTL::vector<Npod> self_default_npod2(self_default_npod);
 		cout << std::boolalpha << "is the same? "
 			<< (self_default_npod == self_default_npod2) << ", "
 			<< (self_default_npod != self_default_npod2) << "\n";
@@ -257,7 +257,7 @@ int main(int argc, char* argv[]) {
 	cout << endl;
 	{
 		cout << "----- Here is the reference -----\n";
-		SelfMadeSTL::vector<Npod> std_default_npod;
+		selfmadeSTL::vector<Npod> std_default_npod;
 		cout << std::boolalpha << "is empty? "
 			<< std_default_npod.empty() << "\n";
 
@@ -279,7 +279,7 @@ int main(int argc, char* argv[]) {
 			<< "back() = " << std_default_npod.back().ptr->real() << ", "
 			<< std_default_npod.back().ptr->imag() << "\n";
 
-		SelfMadeSTL::vector<Npod> std_default_npod2(std_default_npod);
+		selfmadeSTL::vector<Npod> std_default_npod2(std_default_npod);
 		cout << std::boolalpha << "is the same? "
 			<< (std_default_npod == std_default_npod2) << ", "
 			<< (std_default_npod != std_default_npod2) << "\n";

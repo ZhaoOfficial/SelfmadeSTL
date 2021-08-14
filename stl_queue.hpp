@@ -6,7 +6,7 @@
 #include "stl_heap.hpp"
 #include "stl_vector.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
     template <typename T, typename Sequence = deque<T>>
     class queue {
@@ -58,13 +58,16 @@ namespace SelfMadeSTL {
         priority_queue(const Compare& c, const Sequence& s) : container(s), comp(c) {
             make_heap(container.begin(), container.end(), comp);
         }
-        priority_queue(const value_type* first, const value_type* last) : container(first, last) {
+        template <typename InputIterator>
+        priority_queue(const InputIterator first, const InputIterator last) : container(first, last) {
             make_heap(container.begin(), container.end(), comp);
         }
-        priority_queue(const value_type* first, const value_type* last, const Compare& c) : container(first, last), comp(c) {
+        template <typename InputIterator>
+        priority_queue(const InputIterator first, const InputIterator last, const Compare& c) : container(first, last), comp(c) {
             make_heap(container.begin(), container.end(), comp);
         }
-        priority_queue(const value_type* first, const value_type* last, const Compare& c, const Sequence& s) : container(s), comp(c) {
+        template <typename InputIterator>
+        priority_queue(const InputIterator first, const InputIterator last, const Compare& c, const Sequence& s) : container(s), comp(c) {
             container.insert(container.end(), first, last);
             make_heap(container.begin(), container.end(), comp);
         }

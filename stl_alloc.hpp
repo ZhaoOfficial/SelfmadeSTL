@@ -7,7 +7,7 @@
 
 #include "stl_construct.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
 	// primary space allocator
 	template <int inst>

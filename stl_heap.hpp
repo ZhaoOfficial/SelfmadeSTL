@@ -3,7 +3,7 @@
 
 #include "stl_iterator.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
     // top index is 0 not 1
 
@@ -44,7 +44,7 @@ namespace SelfMadeSTL {
     }
 
     template <typename RandomAccessIterator, typename Distance, typename T, typename Compare>
-    inline void __push_heap_aux(RandomAccessIterator first, RandomAccessIterator last, Distance, T*, Compare comp) {
+    inline void __push_heap_aux(RandomAccessIterator first, RandomAccessIterator last, Distance*, T*, Compare comp) {
         __push_heap(first, Distance((last - first) - 1), Distance(0), T(*(last - 1)), comp);
     }
 
@@ -170,7 +170,7 @@ template <typename RandomAccessIterator, typename Distance, typename T, typename
 
     template <typename RandomAccessIterator, typename Compare>
     inline void make_heap(RandomAccessIterator first, RandomAccessIterator last, Compare comp) {
-        __make_heap(first, last, value_type(first), difference_type(first), comp);
+        __make_heap(first, last, difference_type(first), value_type(first), comp);
     }
     
     template <typename RandomAccessIterator>

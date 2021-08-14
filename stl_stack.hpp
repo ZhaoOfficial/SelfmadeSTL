@@ -3,7 +3,7 @@
 
 #include "stl_deque.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
     template <typename T, typename Sequence = deque<T>>
     class stack {

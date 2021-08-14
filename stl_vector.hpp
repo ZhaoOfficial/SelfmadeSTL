@@ -7,7 +7,7 @@
 #include "stl_type_traits.hpp"
 #include "stl_uninitialized.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
     
     template <typename T, typename Alloc = allocator<T>>
     class vector {
@@ -56,12 +56,12 @@ namespace SelfMadeSTL {
                 iterator new_finish = new_start;
                 try {
                     // copy old [start, pos) to new [start, pos)
-                    new_finish = SelfMadeSTL::uninitialized_copy(start, pos, new_start);
+                    new_finish = selfmadeSTL::uninitialized_copy(start, pos, new_start);
                     // place the inserted value
                     construct(new_finish, value);
                     ++new_finish;
                     // copy old [pos, finish) to new [pos + 1, finish)
-                    new_finish = SelfMadeSTL::uninitialized_copy(pos, finish, new_finish);
+                    new_finish = selfmadeSTL::uninitialized_copy(pos, finish, new_finish);
                 }
                 catch (const std::exception&) {
                     // exception handling
@@ -118,19 +118,19 @@ namespace SelfMadeSTL {
         
         vector(size_type n, const T& value) {
             start = vector_allocator::allocate(n);
-            finish = SelfMadeSTL::uninitialized_fill_n(start, n, value);
+            finish = selfmadeSTL::uninitialized_fill_n(start, n, value);
             end_of_storage = finish;
         }
         
         explicit vector(const size_type n) {
             start = vector_allocator::allocate(n);
-            finish = SelfMadeSTL::uninitialized_fill_n(start, n, value_type());
+            finish = selfmadeSTL::uninitialized_fill_n(start, n, value_type());
             end_of_storage = finish;
         }
 
         vector(const vector& other) {
             start = vector_allocator::allocate(other.size());
-            finish = SelfMadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
+            finish = selfmadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
             end_of_storage = finish;
         }
 
@@ -143,9 +143,15 @@ namespace SelfMadeSTL {
             other.end_of_storage = nullptr;
         }
 
+        vector(const value_type* first, const value_type* last) {
+            start = vector_allocator::allocate(last - first);
+            finish = selfmadeSTL::uninitialized_copy(first, last, begin());
+            end_of_storage = finish;
+        }
+
         vector(const iterator first, const iterator last) {
             start = vector_allocator::allocate(last - first);
-            finish = SelfMadeSTL::uninitialized_copy(first, last, begin());
+            finish = selfmadeSTL::uninitialized_copy(first, last, begin());
             end_of_storage = finish;
         }
         
@@ -157,7 +163,7 @@ namespace SelfMadeSTL {
                 destory(start, finish);
                 vector_allocator::deallocate(start, capacity());
                 start = vector_allocator::allocate(other.size());
-                finish = SelfMadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
+                finish = selfmadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
                 end_of_storage = finish;
             }
         }
@@ -259,23 +265,23 @@ namespace SelfMadeSTL {
                     // more tail elements
                     if (after_pos > n) {
                         // copy [finish - n, finish) to [finish, finish + n)
-                        SelfMadeSTL::uninitialized_copy(finish - n, finish, finish);
+                        selfmadeSTL::uninitialized_copy(finish - n, finish, finish);
                         finish += n;
                         // copy [pos, finish - n) to [pos + n, finish)
                         copy_backward(pos, old_finish - n, old_finish);
                         // fill [pos, pos + n)
-                        SelfMadeSTL::fill(pos, pos + n, value);
+                        selfmadeSTL::fill(pos, pos + n, value);
                     }
                     // more inserted value
                     else {
                         // fill [finish, pos + n)
-                        SelfMadeSTL::uninitialized_fill_n(finish, n - after_pos, value);
+                        selfmadeSTL::uninitialized_fill_n(finish, n - after_pos, value);
                         finish += n - after_pos;
                         // copy [pos, finish) to [pos + n, finish + n)
-                        SelfMadeSTL::uninitialized_copy(pos, old_finish, finish);
+                        selfmadeSTL::uninitialized_copy(pos, old_finish, finish);
                         finish += after_pos;
                         // fill [pos, finish)
-                        SelfMadeSTL::fill(pos, old_finish, value);
+                        selfmadeSTL::fill(pos, old_finish, value);
                     }
                 }
                 // not enough space
@@ -288,11 +294,11 @@ namespace SelfMadeSTL {
                     iterator new_finish = new_start;
                     try {
                         // copy old [start, pos) to new [start, pos)
-                        new_finish = SelfMadeSTL::uninitialized_copy(start, pos, new_start);
+                        new_finish = selfmadeSTL::uninitialized_copy(start, pos, new_start);
                         // place n inserted value
-                        new_finish = SelfMadeSTL::uninitialized_fill_n(new_finish, n, value);
+                        new_finish = selfmadeSTL::uninitialized_fill_n(new_finish, n, value);
                         // copy old [pos, finish) to new [pos + n, finish + n)
-                        new_finish = SelfMadeSTL::uninitialized_copy(pos, finish, new_finish);
+                        new_finish = selfmadeSTL::uninitialized_copy(pos, finish, new_finish);
                     }
                     catch (const std::exception&) {
                         // exception handling
@@ -312,29 +318,29 @@ namespace SelfMadeSTL {
 
         template <typename InputIterator>
         void insert(iterator pos, InputIterator first, InputIterator last) {
-            size_type n = SelfMadeSTL::distance(first, last);
+            size_type n = selfmadeSTL::distance(first, last);
             if (n != 0) {
                 if ((size_type)(end_of_storage - finish) >= n) {
                     const size_type after_pos = finish - pos;
                     iterator old_finish = finish;
                     if (after_pos > n) {
                         // copy [finish - n, finish) to [finish, finish + n)
-                        SelfMadeSTL::uninitialized_copy(finish - n, finish, finish);
+                        selfmadeSTL::uninitialized_copy(finish - n, finish, finish);
                         finish += n;
                         // copy [pos, finish - n) to [pos + n, finish)
-                        SelfMadeSTL::copy_backward(pos, old_finish - n, old_finish);
+                        selfmadeSTL::copy_backward(pos, old_finish - n, old_finish);
                         // copy [first, last) to [pos, pos + n)
-                        SelfMadeSTL::copy(first, last, pos);
+                        selfmadeSTL::copy(first, last, pos);
                     }
                     else {
                         // copy [first + after_pos, last) to [finish, pos + n)
-                        SelfMadeSTL::uninitialized_copy(first + after_pos, last, finish);
+                        selfmadeSTL::uninitialized_copy(first + after_pos, last, finish);
                         finish += n - after_pos;
                         // copy [pos, finish) to [pos + n, finish + n)
-                        SelfMadeSTL::uninitialized_copy(pos, old_finish, finish);
+                        selfmadeSTL::uninitialized_copy(pos, old_finish, finish);
                         finish += after_pos;
                         // copy [first, first + after_pos) to [pos, finish)
-                        SelfMadeSTL::copy(first, first + after_pos, pos);
+                        selfmadeSTL::copy(first, first + after_pos, pos);
                     }
                 }
                 else {
@@ -344,9 +350,9 @@ namespace SelfMadeSTL {
                     iterator new_start = vector_allocator::allocate(new_capacity);
                     iterator new_finish = new_start;
                     try {
-                        new_finish = SelfMadeSTL::uninitialized_copy(start, pos, new_start);
-                        new_finish = SelfMadeSTL::uninitialized_copy(first, last, new_finish);
-                        new_finish = SelfMadeSTL::uninitialized_copy(pos, finish, new_finish);
+                        new_finish = selfmadeSTL::uninitialized_copy(start, pos, new_start);
+                        new_finish = selfmadeSTL::uninitialized_copy(first, last, new_finish);
+                        new_finish = selfmadeSTL::uninitialized_copy(pos, finish, new_finish);
                     }
                     catch (const std::exception&) {
                         destory(new_start, new_finish);
@@ -371,7 +377,7 @@ namespace SelfMadeSTL {
         }
         
         iterator erase(iterator first, iterator last) {
-            iterator new_finish = SelfMadeSTL::copy(last, finish, first);
+            iterator new_finish = selfmadeSTL::copy(last, finish, first);
             destory(new_finish, finish);
             finish = new_finish;
             return first;
@@ -406,7 +412,7 @@ namespace SelfMadeSTL {
         void shrink_to_fit() {
             if (size() != capacity()) {
                 iterator new_start = vector_allocator::allocate(size());
-                iterator new_finish = SelfMadeSTL::uninitialized_copy(begin(), end(), new_start);
+                iterator new_finish = selfmadeSTL::uninitialized_copy(begin(), end(), new_start);
                 destory(start, finish);
                 vector_allocator::deallocate(start, capacity());
                 start = new_start;
@@ -432,7 +438,7 @@ namespace SelfMadeSTL {
         }
 
         bool operator<(const vector& other) {
-            return SelfMadeSTL::lexicographical_compare(begin(), end(), other.begin(), other.end());
+            return selfmadeSTL::lexicographical_compare(begin(), end(), other.begin(), other.end());
         }
 
     };

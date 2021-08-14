@@ -38,7 +38,7 @@ int main() {
 	// testing
 	{
 		cout << "----- Test of POD default constructor and copy constructor -----\n";
-		SelfMadeSTL::list<double> self_default_pod;
+		selfmadeSTL::list<double> self_default_pod;
 		cout << std::boolalpha << "is empty? "
 			<< self_default_pod.empty() << "\n";
 
@@ -55,7 +55,7 @@ int main() {
 			<< "front() = " << self_default_pod.front() << ", "
 			<< "back() = " << self_default_pod.back() << "\n";
 
-		SelfMadeSTL::list<double> self_default_pod2(self_default_pod);
+		selfmadeSTL::list<double> self_default_pod2(self_default_pod);
 		cout << std::boolalpha << "is the same? "
 			<< (self_default_pod == self_default_pod2) << ", "
 			<< (self_default_pod != self_default_pod2) << "\n";
@@ -166,7 +166,7 @@ int main() {
 
 	{
 		cout << "----- Test of non-POD default constructor and copy constructor -----\n";
-		SelfMadeSTL::list<Npod> self_default_npod;
+		selfmadeSTL::list<Npod> self_default_npod;
 		cout << std::boolalpha << "is empty? "
 			<< self_default_npod.empty() << "\n";
 
@@ -187,7 +187,7 @@ int main() {
 			<< "back() = " << self_default_npod.back().ptr->real() << ", "
 			<< self_default_npod.back().ptr->imag() << ", " << "\n";
 
-		SelfMadeSTL::list<Npod> self_default_npod2(self_default_npod);
+		selfmadeSTL::list<Npod> self_default_npod2(self_default_npod);
 		cout << std::boolalpha << "is the same? "
 			<< (self_default_npod == self_default_npod2) << ", "
 			<< (self_default_npod != self_default_npod2) << "\n";

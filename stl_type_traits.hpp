@@ -1,7 +1,7 @@
 #ifndef _TYPE_TRAITS_H_
 #define _TYPE_TRAITS_H_
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 	// non-trivial default ctor
 	// non-trivial copy ctor
 	// non-trivial assignment operator

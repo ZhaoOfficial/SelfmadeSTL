@@ -3,7 +3,7 @@
 
 #include <cstddef>
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
 	// tags are tagged for function overloaded resolution
 	struct input_iterator_tag {};

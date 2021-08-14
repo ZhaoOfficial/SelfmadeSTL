@@ -8,7 +8,7 @@
 #include "stl_uninitialized.hpp"
 #include <iostream>
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 
 	template <typename T>
 	struct list_node {
@@ -176,7 +176,7 @@ namespace SelfMadeSTL {
 		}
 
 		bool operator<(const list& other) const {
-			return SelfMadeSTL::lexicographical_compare(begin(), end(), other.begin(), other.end());
+			return selfmadeSTL::lexicographical_compare(begin(), end(), other.begin(), other.end());
 		}
 
 		iterator insert(iterator pos, const T& value = value_type()) {

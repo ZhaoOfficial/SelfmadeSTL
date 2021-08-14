@@ -9,7 +9,7 @@
 #include "stl_alloc.hpp"
 #include "stl_construct.hpp"
 
-namespace SelfMadeSTL {
+namespace selfmadeSTL {
 	// standard allocator but less efficient
 
 	template <typename T>
