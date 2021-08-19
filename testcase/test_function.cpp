@@ -1,5 +1,7 @@
 #include <iostream>
+
 #include "../stl_function.hpp"
+#include "../stl_pair.hpp"
 
 using std::cout;
 using std::endl;
@@ -28,8 +30,8 @@ int main() {
     cout << "logical_or: " << logical_or<int>()(a, b) << endl;
     cout << "logical_not: " << logical_not<int>()(a) << endl;
     cout << "identity: " << identity<int>()(a) << endl;
-    // cout << "select1st: " << select1st<pair<int, int>>()(pair<int, int>(a, b)) << endl;
-    // cout << "select2rd: " << select2rd<pair<int, int>>()(pair<int, int>(a, b)) << endl;
+    cout << "select1st: " << select1st<pair<int, int>>()(pair<int, int>(a, b)) << endl;
+    cout << "select2rd: " << select2rd<pair<int, int>>()(pair<int, int>(a, b)) << endl;
     cout << "project1st: " << project1st<int, int>()(a, b) << endl;
     cout << "project2rd: " << project2rd<int, int>()(a, b) << endl;
     
