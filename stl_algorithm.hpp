@@ -34,6 +34,68 @@ namespace selfmadeSTL {
 		return comp(a, b) ? b : a;
 	}
 
+	// find a iterator point to the maximal element for a range
+	//! O(n)
+	template <typename ForwardIterator>
+	ForwardIterator max_element(ForwardIterator first, ForwardIterator last) {
+		if (first == last) {
+			return last;
+		}
+		ForwardIterator result = first;
+		for (++first; first != last; ++first) {
+			if (*result < *first) {
+				result = first;
+			}
+		}
+		return result;
+	}
+
+	//! O(n)
+	template <typename ForwardIterator, typename Compare>
+	ForwardIterator max_element(ForwardIterator first, ForwardIterator last, Compare comp) {
+		if (first == last) {
+			return last;
+		}
+		ForwardIterator result = first;
+		for (++first; first != last; ++first) {
+			if (comp(*result, *first)) {
+				result = first;
+			}
+		}
+		return result;
+	}
+
+	// find a iterator point to the minimal element for a range
+	//! O(n)
+	template <typename ForwardIterator>
+	ForwardIterator min_element(ForwardIterator first, ForwardIterator last) {
+		if (first == last) {
+			return last;
+		}
+		ForwardIterator result = first;
+		for (++first; first != last; ++first) {
+			if (*first < *result) {
+				result = first;
+			}
+		}
+		return result;
+	}
+
+	//! O(n)
+	template <typename ForwardIterator, typename Compare>
+	ForwardIterator min_element(ForwardIterator first, ForwardIterator last, Compare comp) {
+		if (first == last) {
+			return last;
+		}
+		ForwardIterator result = first;
+		for (++first; first != last; ++first) {
+			if (comp(*first, *result)) {
+				result = first;
+			}
+		}
+		return result;
+	}
+
 	//! O(1)
 	template <typename T>
 	inline const T& median(const T& a, const T& b, const T& c) {
@@ -393,6 +455,45 @@ namespace selfmadeSTL {
 	}
 
 	//! set algorithms !//
+	// set algorithms suppose they are in the same (ascending or descending) order
+	// $S_1 \supset S_2$
+	//! O(n)
+	template <typename InputIterator1, typename InputIterator2>
+	bool includes(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2) {
+		while (first1 != last1 && first2 != last2) {
+			if (*first1 < *first2) {
+				++first1;
+			}
+			else if (*first2 < *first1) {
+				return false;
+			}
+			else {
+				++first1;
+				++first2;
+			}
+		}
+		return first2 == last2;
+	}
+
+	// $S_1 \supset S_2$
+	//! O(n)
+	template <typename InputIterator1, typename InputIterator2, typename Compare>
+	bool includes(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, Compare comp) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first1, *first2)) {
+				++first1;
+			}
+			else if (comp(*first2, *first1)) {
+				return false;
+			}
+			else {
+				++first1;
+				++first2;
+			}
+		}
+		return first2 == last2;
+	}
+
 	// $S_1 \cup S_2$
 	//! O(n)
 	template <typename InputIterator1, typename InputIterator2, typename OutputIterator>
@@ -580,6 +681,47 @@ namespace selfmadeSTL {
 		return result;
 	}
 
+	// $S_1 + S_2$
+	//! O(n)
+	template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+	OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result) {
+		while (first1 != last1 && first2 != last2) {
+			if (*first2 < *first1) {
+				*result = *first2;
+				++first2;
+			}
+			else {
+				*result = *first1;
+				++first1;
+			}
+			++result;
+		}
+		result = copy(first1, last1, result);
+		result = copy(first2, last2, result);
+		return result;
+	}
+
+	// $S_1 + S_2$
+	//! O(n)
+	template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+	OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result, Compare comp) {
+		while (first1 != last1 && first2 != last2) {
+			if (comp(*first2, *first1)) {
+				*result = *first2;
+				++first2;
+			}
+			else {
+				*result = *first1;
+				++first1;
+			}
+			++result;
+		}
+		result = copy(first1, last1, result);
+		result = copy(first2, last2, result);
+		return result;
+	}
+
+
 	// find the first two equal adjacent value
 	//! O(n)
 	template<typename ForwardIterator>
@@ -627,10 +769,10 @@ namespace selfmadeSTL {
 	}
 
 	// count the number of elements in [`first`, `last`)
-	// which satisfy the Predictor.
+	// which satisfy the Predicate.
 	//! O(n)
-	template <typename InputIterator, typename Predictor>
-	typename iterator_traits<InputIterator>::difference_type count_if(InputIterator first, InputIterator last, Predictor pred) {
+	template <typename InputIterator, typename Predicate>
+	typename iterator_traits<InputIterator>::difference_type count_if(InputIterator first, InputIterator last, Predicate pred) {
 		typename iterator_traits<InputIterator>::difference_type n = 0;
 		for (; first != last; ++first) {
 			if (pred(*first)) {
@@ -650,10 +792,10 @@ namespace selfmadeSTL {
 		return first;
 	}
 
-	// find the first element that satisfy the predictor
+	// find the first element that satisfy the Predicate
 	//! O(n)
-	template <typename InputIterator, typename Predictor>
-	inline InputIterator find_if(InputIterator first, InputIterator last, Predictor pred) {
+	template <typename InputIterator, typename Predicate>
+	inline InputIterator find_if(InputIterator first, InputIterator last, Predicate pred) {
 		while (first != last && !pred(*first)) {
 			++first;
 		}
@@ -688,7 +830,8 @@ namespace selfmadeSTL {
 		return last1;
 	}
 
-	// 
+	//! find_end !//
+	// forward iterator version
 	//! O(mn)
 	template <typename ForwardIterator1, typename ForwardIterator2>
 	ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator2 last1, ForwardIterator2 first2, ForwardIterator last2, forward_iterator_tag, forward_iterator_tag) {
@@ -697,13 +840,327 @@ namespace selfmadeSTL {
 		}
 		else {
 			ForwardIterator1 result = last1;
-			
+			while (true) {
+				// use search to find match elements
+				ForwardIterator1 new_result = search(first1, last1, first2, last2);
+				if (new_result == last1) {
+					// if not found, return what we have found
+					return result;
+				}
+				else {
+					// prepare for next iteration
+					result = new_result;
+					first1 = new_result;
+					++first1;
+				}
+			}
+		}
+	}
+
+	// forward iterator version
+	//! O(mn)
+	template <typename ForwardIterator1, typename ForwardIterator2, typename BinaryOperator>
+	ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator2 last1, ForwardIterator2 first2, ForwardIterator last2, forward_iterator_tag, forward_iterator_tag, BinaryOperator op) {
+		if (first2 == last2) {
+			return last1;
+		}
+		else {
+			ForwardIterator1 result = last1;
+			while (true) {
+				ForwardIterator1 new_result = search(first1, last1, first2, last2, op);
+				if (new_result == last1) {
+					return result;
+				}
+				else {
+					result = new_result;
+					first1 = new_result;
+					++first1;
+				}
+			}
+		}
+	}
+
+	// bidirectional iterator version, maybe faster from end
+	//! O(mn)
+	template<typename BidirectionalIterator1, typename BidirectionalIterator2>
+	BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, BidirectionalIterator1 last1, BidirectionalIterator2 first2, BidirectionalIterator2 last2, bidirectional_iterator_tag, bidirectional_iterator_tag) {
+		typedef reverse_iterator<BidirectionalIterator1> reviter1;
+		typedef reverse_iterator<BidirectionalIterator2> reviter2;
+
+		reviter1 rlast1(first1);
+		reviter1 rfirst1(last1);
+		reviter2 rlast2(first2);
+		reviter2 rfirst2(last2);
+		reviter1 rresult = search(rfirst1, rlast1, rfirst2, rlast2);
+		if (rresult == rlast1) {
+			return last1;
+		}
+		else {
+			BidirectionalIterator1 result = rresult.base();
+			advance(result, -distance(first2, last2));
+			return result;
+		}
+	}
+
+	// bidirectional iterator version, maybe faster from end
+	//! O(mn)
+	template<typename BidirectionalIterator1, typename BidirectionalIterator2, typename BinaryOperator>
+	BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, BidirectionalIterator1 last1, BidirectionalIterator2 first2, BidirectionalIterator2 last2, bidirectional_iterator_tag, bidirectional_iterator_tag, BinaryOperator op) {
+		typedef reverse_iterator<BidirectionalIterator1> reviter1;
+		typedef reverse_iterator<BidirectionalIterator2> reviter2;
+
+		reviter1 rlast1(first1);
+		reviter1 rfirst1(last1);
+		reviter2 rlast2(first2);
+		reviter2 rfirst2(last2);
+		reviter1 rresult = search(rfirst1, rlast1, rfirst2, rlast2, op);
+		if (rresult == rlast1) {
+			return last1;
+		}
+		else {
+			BidirectionalIterator1 result = rresult.base();
+			advance(result, -distance(first2, last2));
+			return result;
+		}
+	}
+
+	// search [`first2`, `last2`) from the end of the [`first1`, `last1`)
+	template <typename ForwardIterator1, typename ForwardIterator2>
+	inline ForwardIterator1 find_end(ForwardIterator1 first, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2) {
+		typedef typename __type_traits<ForwardIterator1>::iterator_category category1;
+		typedef typename __type_traits<ForwardIterator2>::iterator_category category2;
+
+		return __find_end(first1, last1, first2, last2, category1(), category2());
+	}
+
+	template <typename ForwardIterator1, typename ForwardIterator2, typename BinaryOperator>
+	inline ForwardIterator1 find_end(ForwardIterator1 first, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, BinaryOperator op) {
+		typedef typename __type_traits<ForwardIterator1>::iterator_category category1;
+		typedef typename __type_traits<ForwardIterator2>::iterator_category category2;
+
+		return __find_end(first1, last1, first2, last2, category1(), category2(), op);
+	}
+
+	// apply a function to every element of a range
+	//! O(n)
+	template<typename InputIterator, typename UnaryOperator>
+	UnaryOperator for_each(InputIterator first, InputIterator last, UnaryOperator op) {
+		for (; first != last; ++first) {
+			op(*first);
+		}
+		return op;
+	}
+
+	// generate values for a range, using operator=
+	//! O(n)
+	template <typename ForwardIterator, typename Generator>
+	void generate(ForwardIterator first, ForwardIterator last, Generator gen) {
+		for (; first != last; ++first) {
+			*first = gen();
+		}
+	}
+
+	// generate values for n elements, using operator=
+	//! O(n)
+	template <typename OutputIterator, typename Size, typename Generator>
+	OutputIterator generate(OutputIterator first, Size n, Generator gen) {
+		for (; n > 0; --n, ++first) {
+			*first = gen();
+		}
+		return first;
+	}
+
+	//! remove !//
+	// copy all elements that are not equal to `value`
+	// to `result`, they can be the same container
+	// UB when the container expands
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator, typename T>
+	OutputIterator remove_copy(InputIterator first, InputIterator last, OutputIterator result, const T& value) {
+		for (; first != last; ++first) {
+			if (*first != value) {
+				*result = *first;
+				++result;
+			}
+		}
+		return result;
+	}
+
+	// remove all the elements that are equal to `value`
+	//! O(n)
+	template <typename ForwardIterator, typename T>
+	ForwardIterator remove(ForwardIterator first, ForwardIterator last, const T& value) {
+		first = find(first, last, value);
+		ForwardIterator next = first;
+		return first == last ? first : remove_copy(++next, last, first, value);
+	}
+
+	// copy all elements that satisfy the predicate
+	// to `result`, they can be the same container
+	// UB when the container expands
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator, typename T>
+	OutputIterator remove_copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate pred) {
+		for (; first != last; ++first) {
+			if (!pred(*first)) {
+				*result = *first;
+				++result;
+			}
+		}
+		return result;
+	}
+
+	// remove all the elements that satisfy the predicate
+	//! O(n) 
+	template <typename ForwardIterator, typename Predicate>
+	ForwardIterator remove_if(ForwardIterator first, ForwardIterator last, Predicate pred) {
+		first = find_if(first, last, pred);
+		ForwardIterator next = first;
+		return first == last ? first : remove_copy(++next, last, first, pred);
+	}
+
+	//! replace !//
+	// replace all the elements that are equal to old_value to new_value
+	//! O(n) 
+	template <typename ForwardIterator, typename T>
+	void replace(ForwardIterator first, ForwardIterator last, const T& old_value, const T& new_value) {
+		for (; first != last; ++first) {
+			if (*first == old_value) {
+				*first = new_value;
+			}
+		}
+	}
+
+	// similar to replace, the output container maybe different
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator, typename T>
+	OutputIterator replace_copy(InputIterator first, InputIterator last, OutputIterator result, const T& old_value, const T& new_value) {
+		for (; first != last; ++first, ++result) {
+			*result = (*first == old_value ? new_value : *first);
+		}
+	}
+
+	// replace all the elements that satisfy the predicate to new_value
+	//! O(n)
+	template <typename ForwardIterator, typename Predicate, typename T>
+	void replace_if(ForwardIterator first, ForwardIterator last, Predicate pred, const T& new_value) {
+		for (; first != last; ++first) {
+			if (pred(*first)) {
+				*first = new_value;
+			}
+		}
+	}
+
+	// similar to replace, the output container maybe different
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator, typename Predicate, typename T>
+	OutputIterator remove_copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate pred, const T& new_value) {
+		for (; first != last; ++first, ++result) {
+			*result = (pred(*first) ? new_value : *first);
+		}
+		return result;
+	}
+
+	//! reverse !//
+	// bidirectional iterator version
+	//! O(n)
+	template <typename BidirectionalIterator>
+	void __reverse(BidirectionalIterator first, BidirectionalIterator last, bidirectional_iterator_tag) {
+		while (true) {
+			// here we --last
+			if (first == last || first == --last) {
+				return;
+			}
+			else {
+				// so we only ++first
+				iter_swap(++first, last);
+			}
+		}
+	}
+
+	// random access iterator version
+	//! O(n)
+	template <typename RandomAccessIterator>
+	void __reverse(RandomAccessIterator first, RandomAccessIterator last, random_access_iterator_tag) {
+		while (first < last) {
+			iter_swap(first++, --last);
+		}
+	}
+
+	// reverse elements in container
+	//! O(n)
+	template <typename BidirectionalIterator>
+	inline void reverse(BidirectionalIterator first, BidirectionalIterator last) {
+		__reverse(first, last, iterator_category(first));
+	}
+
+	// copy reversely
+	//! O(n)
+	template <typename BidirectionalIterator, typename OutputIterator>
+	OutputIterator reverse_copy(BidirectionalIterator first, BidirectionalIterator last, OutputIterator result) {
+		while (first != last) {
+			--last;
+			*result = *last;
+			++result;
+		}
+		return result;
+	}
+
+	//! rotate !//
+	// gcd
+	template <typename EuclideanRingElement>
+	EuclideanRingElement __gcd(EuclideanRingElement m, EuclideanRingElement n) {
+		while (n != 0) {
+			EuclideanRingElement t = m % n;
+			m = n;
+			n = t;
+		}
+		return m;
+	}
+	
+	// forward iterator version
+	template <typename ForwardIterator, typename Distance>
+	void __rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last, Distance*, forward_iterator_tag) {
+		for (ForwardIterator i = middle; iter_swap(first, i); ++first; ++i) {
+			if (first == middle) {
+				if (i == middle) {
+					return;
+				}
+				middle = i;
+			}
+			else if (i == last) {
+				i = middle;
+			}
 		}
 	}
 
 
-
-
+	// partition for quick sort
+	//! O(n)
+	template <typename BidirectionalIterator, typename Predicate>
+	BidirectionalIterator partition(BidirectionalIterator first, BidirectionalIterator last, Predicate pred) {
+		while (true) {
+			while (true) {
+				if (first == last)
+					return first;
+				else if (pred(*first))
+					++first;
+				else
+					break;
+			}
+			--last;
+			while (true) {
+				if (first == last)
+					return first;
+				else if (!pred(*last))
+					--last;
+				else
+					break;
+			}
+			iter_swap(first, last);
+			++first;
+		}
+	}
 
 }
 
