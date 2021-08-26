@@ -754,6 +754,7 @@ namespace selfmadeSTL {
 		return last;
 	}
 
+	//! count !//
 	// count the number of elements in [`first, `last`)
 	// which are equal to `value`
 	//! O(n)
@@ -782,6 +783,162 @@ namespace selfmadeSTL {
 		return n;
 	}
 
+	//! search !//
+	// match one by one
+	//! O(mn)
+	template <typename ForwardIterator1, typename ForwardIterator2, typename Distance1, typename Distance2>
+	ForwardIterator1 __search(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, Distance1*, Distance2*) {
+		Distance1 d1 = distance(first1, last1);
+		Distance2 d2 = distance(first2, last2);
+		// can not find if smaller
+		if (d1 < d2) {
+			return last1;
+		}
+
+		ForwardIterator1 curr1 = first1;
+		ForwardIterator1 curr2 = first2;
+		while (curr2 != last2) {
+			// if match, check next
+			if (*curr1 == *curr2) {
+				++curr1;
+				++curr2;
+			}
+			else {
+				// can not find if smaller
+				if (d1 == d2) {
+					return last1;
+				}
+				else {
+					// restart from next element of curr1
+					curr1 = ++first1;
+					curr2 = first2;
+				}
+				--d1;
+			}
+		}
+		return first1;
+	}
+	
+	// search range 2 in range 1
+	//! O(mn)
+	template <typename ForwardIterator1, typename ForwardIterator2>
+	inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2) {
+		return __search(first1, last1, first2, last2, difference_type(first1), difference_type(first2));
+	}
+
+	// match one by one
+	//! O(mn)
+	template <typename ForwardIterator1, typename ForwardIterator2, typename Distance1, typename Distance2, typename BinaryOperator>
+	ForwardIterator1 __search(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, Distance1*, Distance2*, BinaryOperator op) {
+		Distance1 d1 = distance(first1, last1);
+		Distance2 d2 = distance(first2, last2);
+		// can not find if smaller
+		if (d1 < d2) {
+			return last1;
+		}
+
+		ForwardIterator1 curr1 = first1;
+		ForwardIterator1 curr2 = first2;
+		while (curr2 != last2) {
+			// if match, check next
+			if (op(*curr1, *curr2)) {
+				++curr1;
+				++curr2;
+			}
+			else {
+				// can not find if smaller
+				if (d1 == d2) {
+					return last1;
+				}
+				else {
+					// restart from next element of curr1
+					curr1 = ++first1;
+					curr2 = first2;
+				}
+				--d1;
+			}
+		}
+		return first1;
+	}
+	
+	// search range 2 in range 1
+	//! O(mn)
+	template <typename ForwardIterator1, typename ForwardIterator2, typename BinaryOperator>
+	inline ForwardIterator1 search(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, BinaryOperator op) {
+		return __search(first1, last1, first2, last2, difference_type(first1), difference_type(first2), op);
+	}
+
+	// find successive elements in range that are equal to `value`
+	// ! O(n)
+	template <typename ForwardIterator, typename Integer, typename T>
+	ForwardIterator search_n(ForwardIterator first, ForwardIterator last, Integer count, const T& value) {
+		if (count <= 0) {
+			return first;
+		}
+		else {
+			while (first != last && *first != value) {
+				++first;
+			}
+			while (first != last) {
+				// match first
+				Integer n = count - 1;
+				ForwardIterator i = first;
+				++i;
+				while (i != last && n != 0 && *i == value) {
+					++i;
+					--n;
+				}
+				if (n == 0) {
+					return first;
+				}
+				else {
+					// not match
+					first = i;
+					while (first != last && *first != value) {
+						++first;
+					}
+				}
+			}
+		}
+		return last;
+	}
+
+	// find successive elements in range that are equal to `value`
+	// ! O(n)
+	template <typename ForwardIterator, typename Integer, typename T, typename BinaryOperator>
+	ForwardIterator search_n(ForwardIterator first, ForwardIterator last, Integer count, const T& value, BinaryOperator op) {
+		if (count <= 0) {
+			return first;
+		}
+		else {
+			while (first != last && !op(*first, value)) {
+				++first;
+			}
+			while (first != last) {
+				// match first
+				Integer n = count - 1;
+				ForwardIterator i = first;
+				++i;
+				while (i != last && n != 0 && op(*i, value)) {
+					++i;
+					--n;
+				}
+				if (n == 0) {
+					return first;
+				}
+				else {
+					// not match
+					first = i;
+					while (first != last && !op(*first, value)) {
+						++first;
+					}
+				}
+			}
+		}
+		return last;
+	}
+
+	//! find !//
 	// find the first element that is equal to `value`
 	//! O(n)
 	template <typename InputIterator, typename T>
@@ -834,7 +991,7 @@ namespace selfmadeSTL {
 	// forward iterator version
 	//! O(mn)
 	template <typename ForwardIterator1, typename ForwardIterator2>
-	ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator2 last1, ForwardIterator2 first2, ForwardIterator last2, forward_iterator_tag, forward_iterator_tag) {
+	ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator2 last1, ForwardIterator2 first2, ForwardIterator2 last2, forward_iterator_tag, forward_iterator_tag) {
 		if (first2 == last2) {
 			return last1;
 		}
@@ -860,7 +1017,7 @@ namespace selfmadeSTL {
 	// forward iterator version
 	//! O(mn)
 	template <typename ForwardIterator1, typename ForwardIterator2, typename BinaryOperator>
-	ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator2 last1, ForwardIterator2 first2, ForwardIterator last2, forward_iterator_tag, forward_iterator_tag, BinaryOperator op) {
+	ForwardIterator1 __find_end(ForwardIterator1 first1, ForwardIterator2 last1, ForwardIterator2 first2, ForwardIterator2 last2, forward_iterator_tag, forward_iterator_tag, BinaryOperator op) {
 		if (first2 == last2) {
 			return last1;
 		}
@@ -926,21 +1083,22 @@ namespace selfmadeSTL {
 
 	// search [`first2`, `last2`) from the end of the [`first1`, `last1`)
 	template <typename ForwardIterator1, typename ForwardIterator2>
-	inline ForwardIterator1 find_end(ForwardIterator1 first, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2) {
-		typedef typename __type_traits<ForwardIterator1>::iterator_category category1;
-		typedef typename __type_traits<ForwardIterator2>::iterator_category category2;
+	inline ForwardIterator1 find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2) {
+		typedef typename iterator_traits<ForwardIterator1>::iterator_category category1;
+		typedef typename iterator_traits<ForwardIterator2>::iterator_category category2;
 
 		return __find_end(first1, last1, first2, last2, category1(), category2());
 	}
 
 	template <typename ForwardIterator1, typename ForwardIterator2, typename BinaryOperator>
-	inline ForwardIterator1 find_end(ForwardIterator1 first, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, BinaryOperator op) {
-		typedef typename __type_traits<ForwardIterator1>::iterator_category category1;
-		typedef typename __type_traits<ForwardIterator2>::iterator_category category2;
+	inline ForwardIterator1 find_end(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, BinaryOperator op) {
+		typedef typename iterator_traits<ForwardIterator1>::iterator_category category1;
+		typedef typename iterator_traits<ForwardIterator2>::iterator_category category2;
 
 		return __find_end(first1, last1, first2, last2, category1(), category2(), op);
 	}
 
+	//! each !//
 	// apply a function to every element of a range
 	//! O(n)
 	template<typename InputIterator, typename UnaryOperator>
@@ -963,11 +1121,31 @@ namespace selfmadeSTL {
 	// generate values for n elements, using operator=
 	//! O(n)
 	template <typename OutputIterator, typename Size, typename Generator>
-	OutputIterator generate(OutputIterator first, Size n, Generator gen) {
+	OutputIterator generate_n(OutputIterator first, Size n, Generator gen) {
 		for (; n > 0; --n, ++first) {
 			*first = gen();
 		}
 		return first;
+	}
+
+	// transform one range into another range using unary or binary operation
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator, typename UnaryOperator>
+	OutputIterator transform(InputIterator first, InputIterator last, OutputIterator result, UnaryOperator op) {
+		for (; first != last; ++first, ++result) {
+			*result = op(*first);
+		}
+		return result;
+	}
+
+	// transform one range into another range using unary or binary operation
+	//! O(n)
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator, typename BinaryOperator>
+	OutputIterator transform(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, OutputIterator result, BinaryOperator op) {
+		for (; first1 != last1; ++first1, ++first2, ++result) {
+			*result = op(*first1, *first2);
+		}
+		return result;
 	}
 
 	//! remove !//
@@ -999,7 +1177,7 @@ namespace selfmadeSTL {
 	// to `result`, they can be the same container
 	// UB when the container expands
 	//! O(n)
-	template <typename InputIterator, typename OutputIterator, typename T>
+	template <typename InputIterator, typename OutputIterator, typename Predicate>
 	OutputIterator remove_copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate pred) {
 		for (; first != last; ++first) {
 			if (!pred(*first)) {
@@ -1016,7 +1194,7 @@ namespace selfmadeSTL {
 	ForwardIterator remove_if(ForwardIterator first, ForwardIterator last, Predicate pred) {
 		first = find_if(first, last, pred);
 		ForwardIterator next = first;
-		return first == last ? first : remove_copy(++next, last, first, pred);
+		return first == last ? first : remove_copy_if(++next, last, first, pred);
 	}
 
 	//! replace !//
@@ -1038,6 +1216,7 @@ namespace selfmadeSTL {
 		for (; first != last; ++first, ++result) {
 			*result = (*first == old_value ? new_value : *first);
 		}
+		return result;
 	}
 
 	// replace all the elements that satisfy the predicate to new_value
@@ -1054,7 +1233,7 @@ namespace selfmadeSTL {
 	// similar to replace, the output container maybe different
 	//! O(n)
 	template <typename InputIterator, typename OutputIterator, typename Predicate, typename T>
-	OutputIterator remove_copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate pred, const T& new_value) {
+	OutputIterator replace_copy_if(InputIterator first, InputIterator last, OutputIterator result, Predicate pred, const T& new_value) {
 		for (; first != last; ++first, ++result) {
 			*result = (pred(*first) ? new_value : *first);
 		}
@@ -1117,22 +1296,197 @@ namespace selfmadeSTL {
 		}
 		return m;
 	}
-	
+
+	template <typename RandomAccessIterator, typename Distance, typename T>
+	void __rotate_cycle(RandomAccessIterator first, RandomAccessIterator last, RandomAccessIterator initial, Distance shift, T*) {
+		T value = *initial;
+		RandomAccessIterator ptr1 = initial;
+		RandomAccessIterator ptr2 = ptr1 + shift;
+
+		while (ptr2 != initial) {
+			*ptr1 = *ptr2;
+			ptr1 = ptr2;
+			if (last - ptr2 > shift) {
+				ptr2 += shift;
+			}
+			else {
+				ptr2 = first + (shift - (last - ptr2));
+			}
+			*ptr1 = value;
+		}
+	}
+
 	// forward iterator version
 	template <typename ForwardIterator, typename Distance>
 	void __rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last, Distance*, forward_iterator_tag) {
-		for (ForwardIterator i = middle; iter_swap(first, i); ++first; ++i) {
+		for (ForwardIterator i = middle; iter_swap(first, i); ++first, ++i) {
+			// each time we swap the same length of the elements
+			// from first and middle. Once one range is over, we
+			// redo it until all ranges are over.			
+			// first to middle is over
 			if (first == middle) {
 				if (i == middle) {
 					return;
 				}
 				middle = i;
 			}
+			// middle to last is over
 			else if (i == last) {
 				i = middle;
 			}
 		}
 	}
+
+	// bidirectional iterator version
+	//! O(n)
+	template <typename BidirectionalIterator, typename Distance>
+	void __rotate(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Distance*, bidirectional_iterator_tag) {
+		reverse(first, middle);
+		reverse(middle, last);
+		reverse(first, last);
+	}
+
+	// random access iterator version
+	//! O(n)
+	template <typename RandomAccessIterator, typename Distance>
+	void __rotate(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last, Distance*, random_access_iterator_tag) {
+		Distance n = __gcd(last - first, middle - first);
+		while (n--) {
+			__rotate_cycle(first, last, first + n, middle - first, value_type(first));
+		}
+	}
+
+	// swap two ranges
+	//! O(n)
+	template <typename ForwardIterator>
+	inline void rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last) {
+		if (first == middle || middle == last) {
+			return;
+		}
+		else {
+			__rotate(first, middle, last, difference_type(first), iterator_category(first));
+		}
+	}
+
+	// similar to rotate, different container
+	//! O(n)
+	template <typename ForwardIterator, typename OutputIterator>
+	OutputIterator rotate_copy(ForwardIterator first, ForwardIterator middle, ForwardIterator last, OutputIterator result) {
+		result = copy(middle, last, result);
+		result = copy(first, middle, result);
+		return result;
+	}
+
+	// similar to rotate, same length of two ranges
+	// iterators can come from different containers
+	//! O(n)
+	template <typename ForwardIterator1, typename ForwardIterator2>
+	ForwardIterator2 swap_ranges(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2) {
+		for (; first1 != last1; ++first1, ++first2) {
+			iter_swap(first1, first2);
+		}
+		return first2;
+	}
+
+	//! unique !//
+	// forward iterator version
+	//! O(n)
+	template <typename InputIterator, typename ForwardIterator>
+	ForwardIterator __unique_copy(InputIterator first, InputIterator last, ForwardIterator result, forward_iterator_tag) {
+		*result = *first;
+		while (++first != last) {
+			// if not match, reserve it
+			if (*result != *first) {
+				++result;
+				*result = *first;
+			}
+		}
+		return ++result;
+	}
+
+	// output iterator version
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator>
+	OutputIterator __unique_copy(InputIterator first, InputIterator last, OutputIterator result, output_iterator_tag) {
+		auto value = *first;
+		*result = value;
+		while (++first != last) {
+			if (value != *first) {
+				value = *first;
+				++result;
+				*result = value;
+			}
+		}
+		return ++result;
+	}
+
+	// remove duplicate nearby elements, maybe different container
+	template <typename InputIterator, typename OutputIterator>
+	inline OutputIterator unique_copy(InputIterator first, InputIterator last, OutputIterator result) {
+		if (first == last) {
+			return result;
+		}
+		return __unique_copy(first, last, result, iterator_category(result));
+	}
+
+	// remove duplicate nearby elements
+	//! O(n)
+	template <typename ForwardIterator>
+	ForwardIterator unique(ForwardIterator first, ForwardIterator last) {
+		first = adjacent_find(first, last);
+		return unique_copy(first, last, first);
+	}
+
+	// forward iterator version
+	//! O(n)
+	template <typename InputIterator, typename ForwardIterator, typename BinaryOperator>
+	ForwardIterator __unique_copy(InputIterator first, InputIterator last, ForwardIterator result, forward_iterator_tag, BinaryOperator op) {
+		*result = *first;
+		while (++first != last) {
+			// if not match, reserve it
+			if (!op(*result, *first)) {
+				++result;
+				*result = *first;
+			}
+		}
+		return ++result;
+	}
+
+	// output iterator version
+	//! O(n)
+	template <typename InputIterator, typename OutputIterator, typename BinaryOperator>
+	OutputIterator __unique_copy(InputIterator first, InputIterator last, OutputIterator result, output_iterator_tag, BinaryOperator op) {
+		auto value = *first;
+		*result = value;
+		while (++first != last) {
+			if (!op(value, *first)) {
+				value = *first;
+				++result;
+				*result = value;
+			}
+		}
+		return ++result;
+	}
+
+	// remove duplicate nearby elements, maybe different container
+	template <typename InputIterator, typename OutputIterator, typename BinaryOperator>
+	inline OutputIterator unique_copy(InputIterator first, InputIterator last, OutputIterator result, BinaryOperator op) {
+		if (first == last) {
+			return result;
+		}
+		return __unique_copy(first, last, result, iterator_category(result), op);
+	}
+
+	// remove duplicate nearby elements
+	//! O(n)
+	template <typename ForwardIterator, typename BinaryOperator>
+	ForwardIterator unique(ForwardIterator first, ForwardIterator last, BinaryOperator op) {
+		first = adjacent_find(first, last, op);
+		return unique_copy(first, last, first, op);
+	}
+
+
+
 
 
 	// partition for quick sort

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <complex>
 #include <cmath>
+#include <random>
 
 #include "../stl_algorithm.hpp"
 
@@ -17,7 +18,7 @@ public:
 		ptr->real(other.ptr->real());
 		ptr->imag(other.ptr->imag());
 	}
-	Npod(const Npod&& other) {
+	Npod(const Npod&& other) noexcept {
 		ptr = other.ptr;
 	}
 	Npod(const double& real, const double& imag) {
@@ -78,6 +79,28 @@ namespace selfmadeSTL {
 		return first1 == last1 && first2 == last2;
 	}
 
+	template <typename T>
+	struct display {
+		void operator()(const T& x) const {
+			std::cout << x << ' ';
+		}
+	};
+
+	struct even {
+		bool operator()(int x) const {
+			return x % 2 ? false : true;
+		}
+	};
+
+	class add2 {
+	public:
+		int operator()() const {
+			return a += 2;
+		}
+	private:
+		static int a;
+	};
+	int add2::a = 0;
 }
 
 #endif // !_TEST_FUNCTION_H_
