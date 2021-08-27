@@ -51,6 +51,10 @@ public:
 		other.ptr->real() * other.ptr->real() + other.ptr->imag() * other.ptr->imag();
 	}
 
+	void print() const {
+		std::cout << '[' << this->ptr->real() << " + " << this->ptr->imag() << ']';
+	}
+
 	std::complex<double>* ptr;
 };
 
@@ -85,6 +89,11 @@ namespace selfmadeSTL {
 			std::cout << x << ' ';
 		}
 	};
+	
+	template <typename T>
+	void print(const T& x) {
+		std::cout << '[' << x << ']';
+	}
 
 	struct even {
 		bool operator()(int x) const {

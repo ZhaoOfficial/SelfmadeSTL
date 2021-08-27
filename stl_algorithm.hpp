@@ -163,6 +163,7 @@ namespace selfmadeSTL {
 
 	//! copy !//
 	// InputIterator version
+	//! O(n)
 	template <typename InputIterator, typename OutputIterator>
 	OutputIterator __copy(InputIterator first, InputIterator last, OutputIterator result, input_iterator_tag) {
 		for ( ; first != last; ++first, ++result) {
@@ -172,6 +173,7 @@ namespace selfmadeSTL {
 	}
 
 	// RandomAccessIterator version
+	//! O(n)
 	template <typename RandomAccessIterator, typename OutputIterator, typename Distance>
 	OutputIterator __copy_d(RandomAccessIterator first, RandomAccessIterator last, OutputIterator result, Distance*) {
 		for (Distance n = last - first; n > 0; --n, ++result, ++first) {
@@ -195,6 +197,7 @@ namespace selfmadeSTL {
 	};
 
 	// has_trivial_assignment_operator
+	//! O(1)
 	template <typename T>
 	T* __copy_trivial(const T* first, const T* last, T* result, __true_type) {
 		memmove(result, first, sizeof(T) * (last - first));
@@ -243,6 +246,7 @@ namespace selfmadeSTL {
 	}
 
 	//! copy_backward !//
+	//! O(n)
 	template<typename BidirectionalIterator1, typename BidirectionalIterator2, typename Distance>
 	inline BidirectionalIterator2 __copy_backward(BidirectionalIterator1 first, BidirectionalIterator1 last, BidirectionalIterator2 result, bidirectional_iterator_tag, Distance*) {
 		while (first != last) {
@@ -251,6 +255,7 @@ namespace selfmadeSTL {
 		return result;
 	}
 
+	//! O(n)
 	template <typename RandomAccessIterator, typename BidirectionalIterator, typename Distance>
 	inline BidirectionalIterator __copy_backward(RandomAccessIterator first, RandomAccessIterator last, BidirectionalIterator result, random_access_iterator_tag, Distance*) {
 		for (Distance n = last - first; n > 0; --n) {
@@ -266,6 +271,7 @@ namespace selfmadeSTL {
 		}
 	};
 
+	//! O(1)
 	template <typename T>
 	T* __copy_backward_trivial(const T* first, const T* last, T* result, __true_type) {
 		const ptrdiff_t len = last - first;
@@ -739,6 +745,7 @@ namespace selfmadeSTL {
 		return last;
 	}
 
+	//! O(n)
 	template<typename ForwardIterator, typename BinaryOperator>
 	ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last, BinaryOperator op) {
 		if (first == last) {
@@ -784,7 +791,7 @@ namespace selfmadeSTL {
 	}
 
 	//! search !//
-	// match one by one
+	// linear search
 	//! O(mn)
 	template <typename ForwardIterator1, typename ForwardIterator2, typename Distance1, typename Distance2>
 	ForwardIterator1 __search(ForwardIterator1 first1, ForwardIterator1 last1, ForwardIterator2 first2, ForwardIterator2 last2, Distance1*, Distance2*) {
@@ -1287,6 +1294,7 @@ namespace selfmadeSTL {
 
 	//! rotate !//
 	// gcd
+	//! O(log(n))
 	template <typename EuclideanRingElement>
 	EuclideanRingElement __gcd(EuclideanRingElement m, EuclideanRingElement n) {
 		while (n != 0) {
@@ -1317,6 +1325,7 @@ namespace selfmadeSTL {
 	}
 
 	// forward iterator version
+	//! O(n)
 	template <typename ForwardIterator, typename Distance>
 	void __rotate(ForwardIterator first, ForwardIterator middle, ForwardIterator last, Distance*, forward_iterator_tag) {
 		for (ForwardIterator i = middle; iter_swap(first, i); ++first, ++i) {
@@ -1485,9 +1494,300 @@ namespace selfmadeSTL {
 		return unique_copy(first, last, first, op);
 	}
 
+	//! search algorithm !//
 
+	// a way of binary search, return the first proper
+	// position in the range that can insert a new value
+	//! O(n)
+	template <typename ForwardIterator, typename T, typename Distance>
+	ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*) {
+		Distance len = distance(first, last);
+		Distance half;
+		ForwardIterator middle;
 
+		while (len > 0) {
+			half = len >> 1;
+			middle = first;
+			advance(middle, half);
+			if (*middle < value) {
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+			else {
+				len = half;
+			}
+		}
+		return first;
+	}
 
+	template <typename ForwardIterator, typename T>
+	inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value) {
+		return __lower_bound(first, last, value, difference_type(first));
+	}
+
+	//! O(n)
+	template <typename ForwardIterator, typename T, typename Distance, typename Compare>
+	ForwardIterator __lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*, Compare comp) {
+		Distance len = distance(first, last);
+		Distance half;
+		ForwardIterator middle;
+
+		while (len > 0) {
+			half = len >> 1;
+			middle = first;
+			advance(middle, half);
+			if (comp(*middle, value)) {
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+			else {
+				len = half;
+			}
+		}
+		return first;
+	}
+
+	template <typename ForwardIterator, typename T, typename Compare>
+	inline ForwardIterator lower_bound(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) {
+		return __lower_bound(first, last, value, difference_type(first), comp);
+	}
+
+	// a way of binary search, return the last proper
+	// position in the range that can insert a new value
+	//! O(n)
+	template <typename ForwardIterator, typename T, typename Distance>
+	ForwardIterator __upper_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*) {
+		Distance len = distance(first, last);
+		Distance half;
+		ForwardIterator middle;
+
+		while (len > 0) {
+			half = len >> 1;
+			middle = first;
+			advance(middle, half);
+			if (value < *middle) {
+				len = half;
+			}
+			else {
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+		}
+		return first;
+	}
+
+	template <typename ForwardIterator, typename T>
+	inline ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& value) {
+		return __upper_bound(first, last, value, difference_type(first));
+	}
+
+	//! O(n)
+	template <typename ForwardIterator, typename T, typename Distance, typename Compare>
+	ForwardIterator __upper_bound(ForwardIterator first, ForwardIterator last, const T& value, Distance*, Compare comp) {
+		Distance len = distance(first, last);
+		Distance half;
+		ForwardIterator middle;
+
+		while (len > 0) {
+			half = len >> 1;
+			middle = first;
+			advance(middle, half);
+			if (comp(value, *middle)) {
+				len = half;
+			}
+			else {
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+		}
+		return first;
+	}
+
+	template <typename ForwardIterator, typename T, typename Compare>
+	inline ForwardIterator upper_bound(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) {
+		return __upper_bound(first, last, value, difference_type(first), comp);
+	}
+
+	// binary search
+	//! O(n)
+	template <typename ForwardIterator, typename T>
+	bool binary_search(ForwardIterator first, ForwardIterator last, const T& value) {
+		ForwardIterator target = lower_bound(first, last, value);
+		// value may be smaller than the first element
+		return target != last && !(value < *target);
+	}
+
+	//! O(n)
+	template <typename ForwardIterator, typename T, typename Compare>
+	bool binary_search(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) {
+		ForwardIterator target = lower_bound(first, last, value, comp);
+		// value may be smaller than the first element
+		return target != last && !comp(value, *target);
+	}
+
+	//! permutation algorithm !//
+
+	// change inplace
+	//! O(n)
+	template <typename BidirectionalIterator>
+	bool next_permutation(BidirectionalIterator first, BidirectionalIterator last) {
+		// 0
+		if (first == last) {
+			return false;
+		}
+		
+		BidirectionalIterator i = first;
+		++i;
+		// 1
+		if (i == last) {
+			return false;
+		}
+		i = last;
+		--i;
+
+		// from last to first
+		for(;;) {
+			BidirectionalIterator j = i;
+			--i;
+			// if ascending
+			if (*i < *j) {
+				BidirectionalIterator k = last;
+				while (!(*i < *--k)) {}
+				iter_swap(i, k);
+				reverse(j, last);
+				return true;
+			}
+			if (i == first) {
+				reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	//! O(n)
+	template <typename BidirectionalIterator, typename Compare>
+	bool next_permutation(BidirectionalIterator first, BidirectionalIterator last, Compare comp) {
+		if (first == last) {
+			return false;
+		}
+		
+		BidirectionalIterator i = first;
+		++i;
+		if (i == last) {
+			return false;
+		}
+		i = last;
+		--i;
+
+		for(;;) {
+			BidirectionalIterator j = i;
+			--i;
+			if (comp(*i, *j)) {
+				BidirectionalIterator k = last;
+				while (!comp(*i, *--k)) {}
+				iter_swap(i, k);
+				reverse(j, last);
+				return true;
+			}
+			if (i == first) {
+				reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	//! O(n)
+	template <typename BidirectionalIterator>
+	bool prev_permutation(BidirectionalIterator first, BidirectionalIterator last) {
+		if (first == last) {
+			return false;
+		}
+		BidirectionalIterator i = first;
+		++i;
+		if (i == last) {
+			return false;
+		}
+		i = last;
+		--i;
+
+		for (;;) {
+			BidirectionalIterator j = i;
+			--i;
+			if (*j < *i) {
+				BidirectionalIterator k = last;
+				while (!(*--k < *i)) {}
+				iter_swap(i, k);
+				reverse(j, last);
+				return true;
+			}
+			if (i == last) {
+				reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	//! O(n)
+	template <typename BidirectionalIterator, typename Compare>
+	bool prev_permutation(BidirectionalIterator first, BidirectionalIterator last, Compare comp) {
+		if (first == last) {
+			return false;
+		}
+		BidirectionalIterator i = first;
+		++i;
+		if (i == last) {
+			return false;
+		}
+		i = last;
+		--i;
+
+		for (;;) {
+			BidirectionalIterator j = i;
+			--i;
+			if (comp(*j, *i)) {
+				BidirectionalIterator k = last;
+				while (!comp(*--k, *i)) {}
+				iter_swap(i, k);
+				reverse(j, last);
+				return true;
+			}
+			if (i == last) {
+				reverse(first, last);
+				return false;
+			}
+		}
+	}
+
+	//! random shuffle !//
+
+	// random shuffle a range
+	//! O(n)
+	template <typename RandomAccessIterator>
+	inline void random_shuffle(RandomAccessIterator first, RandomAccessIterator last) {
+		if (first == last) {
+			return;
+		}
+		for (RandomAccessIterator i = first + 1; i != last; ++i) {
+			iter_swap(i, first + rand() % ((i - first) + 1));
+		}
+	}
+
+	//! O(n)
+	template <typename RandomAccessIterator, typename RandomNumberGenerator>
+	inline void random_shuffle(RandomAccessIterator first, RandomAccessIterator last, RandomNumberGenerator& rng) {
+		if (first == last) {
+			return;
+		}
+		for (RandomAccessIterator i = first + 1; i != last; ++i) {
+			iter_swap(i, first + rng((i - first) + 1));
+		}
+	}
+
+	//! sorting algorithm !//
 
 	// partition for quick sort
 	//! O(n)
