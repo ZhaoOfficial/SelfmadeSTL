@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "stl_heap.hpp"
 #include "stl_iterator.hpp"
 #include "stl_pair.hpp"
 #include "stl_type_traits.hpp"
@@ -99,19 +100,6 @@ namespace selfmadeSTL {
 	//! O(1)
 	template <typename T>
 	inline const T& median(const T& a, const T& b, const T& c) {
-		if (comp(a, b)) {
-			if (comp(b, c)) return b;
-			else if(comp(a, c)) return c;
-			else return a;
-		}
-		else if (comp(a, c)) return a;
-		else if (comp(b, c)) return c;
-		else return b;
-	}
-
-	//! O(1)
-	template <typename T, typename Compare>
-	inline const T& median(const T& a, const T& b, const T& c, Compare comp) {
 		if (a < b) {
 			if (b < c) return b;
 			else if(a < c) return c;
@@ -119,6 +107,19 @@ namespace selfmadeSTL {
 		}
 		else if (a < c) return a;
 		else if (b < c) return c;
+		else return b;
+	}
+
+	//! O(1)
+	template <typename T, typename Compare>
+	inline const T& median(const T& a, const T& b, const T& c, Compare comp) {
+		if (comp(a, b)) {
+			if (comp(b, c)) return b;
+			else if(comp(a, c)) return c;
+			else return a;
+		}
+		else if (comp(a, c)) return a;
+		else if (comp(b, c)) return c;
 		else return b;
 	}
 
@@ -247,7 +248,7 @@ namespace selfmadeSTL {
 
 	//! copy_backward !//
 	//! O(n)
-	template<typename BidirectionalIterator1, typename BidirectionalIterator2, typename Distance>
+	template <typename BidirectionalIterator1, typename BidirectionalIterator2, typename Distance>
 	inline BidirectionalIterator2 __copy_backward(BidirectionalIterator1 first, BidirectionalIterator1 last, BidirectionalIterator2 result, bidirectional_iterator_tag, Distance*) {
 		while (first != last) {
 			*--result = *--last;
@@ -553,7 +554,7 @@ namespace selfmadeSTL {
 
 	// $S_1 \cap S_2$
 	//! O(n)
-	template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator>
 	OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result) {
 		while (first1 != last1 && first2 != last2) {
 			if (*first1 < *first2) {
@@ -574,7 +575,7 @@ namespace selfmadeSTL {
 	
 	// $S_1 \cap S_2$
 	//! O(n)
-	template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
 	OutputIterator set_intersection(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result, Compare comp) {
 		while (first1 != last1 && first2 != last2) {
 			if (comp(*first1, *first2)) {
@@ -595,7 +596,7 @@ namespace selfmadeSTL {
 
 	// $S_1 - S_2$
 	//! O(n)
-	template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator>
 	OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result) {
 		while (first1 != last1 && first2 != last2) {
 			if (*first1 < *first2) {
@@ -617,7 +618,7 @@ namespace selfmadeSTL {
 	
 	// $S_1 - S_2$
 	//! O(n)
-	template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
 	OutputIterator set_difference(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result, Compare comp) {
 		while (first1 != last1 && first2 != last2) {
 			if (comp(*first1, *first2)) {
@@ -689,7 +690,7 @@ namespace selfmadeSTL {
 
 	// $S_1 + S_2$
 	//! O(n)
-	template<typename InputIterator1, typename InputIterator2, typename OutputIterator>
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator>
 	OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result) {
 		while (first1 != last1 && first2 != last2) {
 			if (*first2 < *first1) {
@@ -709,7 +710,7 @@ namespace selfmadeSTL {
 
 	// $S_1 + S_2$
 	//! O(n)
-	template<typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
+	template <typename InputIterator1, typename InputIterator2, typename OutputIterator, typename Compare>
 	OutputIterator merge(InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2, OutputIterator result, Compare comp) {
 		while (first1 != last1 && first2 != last2) {
 			if (comp(*first2, *first1)) {
@@ -727,10 +728,9 @@ namespace selfmadeSTL {
 		return result;
 	}
 
-
 	// find the first two equal adjacent value
 	//! O(n)
-	template<typename ForwardIterator>
+	template <typename ForwardIterator>
 	ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last) {
 		if (first == last) {
 			return last;
@@ -746,7 +746,7 @@ namespace selfmadeSTL {
 	}
 
 	//! O(n)
-	template<typename ForwardIterator, typename BinaryOperator>
+	template <typename ForwardIterator, typename BinaryOperator>
 	ForwardIterator adjacent_find(ForwardIterator first, ForwardIterator last, BinaryOperator op) {
 		if (first == last) {
 			return last;
@@ -765,7 +765,7 @@ namespace selfmadeSTL {
 	// count the number of elements in [`first, `last`)
 	// which are equal to `value`
 	//! O(n)
-	template<typename InputIterator, typename T>
+	template <typename InputIterator, typename T>
 	typename iterator_traits<InputIterator>::difference_type count(InputIterator first, InputIterator last, const T& value) {
 		typename iterator_traits<InputIterator>::difference_type n = 0;
 		for (; first != last; ++first) {
@@ -1046,7 +1046,7 @@ namespace selfmadeSTL {
 
 	// bidirectional iterator version, maybe faster from end
 	//! O(mn)
-	template<typename BidirectionalIterator1, typename BidirectionalIterator2>
+	template <typename BidirectionalIterator1, typename BidirectionalIterator2>
 	BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, BidirectionalIterator1 last1, BidirectionalIterator2 first2, BidirectionalIterator2 last2, bidirectional_iterator_tag, bidirectional_iterator_tag) {
 		typedef reverse_iterator<BidirectionalIterator1> reviter1;
 		typedef reverse_iterator<BidirectionalIterator2> reviter2;
@@ -1068,7 +1068,7 @@ namespace selfmadeSTL {
 
 	// bidirectional iterator version, maybe faster from end
 	//! O(mn)
-	template<typename BidirectionalIterator1, typename BidirectionalIterator2, typename BinaryOperator>
+	template <typename BidirectionalIterator1, typename BidirectionalIterator2, typename BinaryOperator>
 	BidirectionalIterator1 __find_end(BidirectionalIterator1 first1, BidirectionalIterator1 last1, BidirectionalIterator2 first2, BidirectionalIterator2 last2, bidirectional_iterator_tag, bidirectional_iterator_tag, BinaryOperator op) {
 		typedef reverse_iterator<BidirectionalIterator1> reviter1;
 		typedef reverse_iterator<BidirectionalIterator2> reviter2;
@@ -1108,7 +1108,7 @@ namespace selfmadeSTL {
 	//! each !//
 	// apply a function to every element of a range
 	//! O(n)
-	template<typename InputIterator, typename UnaryOperator>
+	template <typename InputIterator, typename UnaryOperator>
 	UnaryOperator for_each(InputIterator first, InputIterator last, UnaryOperator op) {
 		for (; first != last; ++first) {
 			op(*first);
@@ -1294,7 +1294,7 @@ namespace selfmadeSTL {
 
 	//! rotate !//
 	// gcd
-	//! O(log(n))
+	//! O(logn)
 	template <typename EuclideanRingElement>
 	EuclideanRingElement __gcd(EuclideanRingElement m, EuclideanRingElement n) {
 		while (n != 0) {
@@ -1629,6 +1629,75 @@ namespace selfmadeSTL {
 		return target != last && !comp(value, *target);
 	}
 
+	// find lower bound and upper bound
+	//! O(logn)
+	template <typename ForwardIterator, typename T, typename Distance>
+	pair<ForwardIterator, ForwardIterator> __equal_range(ForwardIterator first, ForwardIterator last, const T& value, Distance*) {
+		Distance len = distance(first, last);
+		Distance half;
+		ForwardIterator middle, left, right;
+		
+		while (len > 0) {
+			half = len >> 1;
+			middle = first;
+			advance(middle, half);
+			if (*middle < value) {
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+			else if (value < *middle) {
+				len = half;
+			}
+			else {
+				left = lower_bound(first, middle, value);
+				advance(first, len);
+				right = upper_bound(++middle, first, value);
+				return pair<ForwardIterator, ForwardIterator>(left, right);
+			}
+		}
+		return pair<ForwardIterator, ForwardIterator>(first, first);
+	}
+
+	template <typename ForwardIterator, typename T>
+	inline pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first, ForwardIterator last, const T& value) {
+		return __equal_range(first, last, value, difference_type(first));
+	}
+
+	//! O(logn)
+	template <typename ForwardIterator, typename T, typename Distance, typename Compare>
+	pair<ForwardIterator, ForwardIterator> __equal_range(ForwardIterator first, ForwardIterator last, const T& value, Distance*, Compare comp) {
+		Distance len = distance(first, last);
+		Distance half;
+		ForwardIterator middle, left, right;
+		
+		while (len > 0) {
+			half = len >> 1;
+			middle = first;
+			advance(middle, half);
+			if (comp(*middle, value)) {
+				first = middle;
+				++first;
+				len = len - half - 1;
+			}
+			else if (comp(value, *middle)) {
+				len = half;
+			}
+			else {
+				left = lower_bound(first, middle, value, comp);
+				advance(first, len);
+				right = upper_bound(++middle, first, value, comp);
+				return pair<ForwardIterator, ForwardIterator>(left, right);
+			}
+		}
+		return pair<ForwardIterator, ForwardIterator>(first, first);
+	}
+	
+	template <typename ForwardIterator, typename T, typename Compare>
+	inline pair<ForwardIterator, ForwardIterator> equal_range(ForwardIterator first, ForwardIterator last, const T& value, Compare comp) {
+		return __equal_range(first, last, value, difference_type(first), comp);
+	}
+
 	//! permutation algorithm !//
 
 	// change inplace
@@ -1788,8 +1857,171 @@ namespace selfmadeSTL {
 	}
 
 	//! sorting algorithm !//
+ 
+	// heapsort a sub-range of a range
+	//! O(n)
+	template <typename RandomAccessIterator, typename T>
+	void __partial_sort(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last, T*) {
+		// this heap will maintain the order in first to middle
+		make_heap(first, middle);
+		// for the rest elements
+		for (RandomAccessIterator i = middle; i < last; ++i) {
+			// if bigger than top, then it is too large
+			if (*i < *first) {
+				// we pop the top, push a new element in middle to last
+				__pop_heap(first, middle, i, difference_type(first), T(*i));
+			}
+		}
+		sort_heap(first, middle);
+	}
 
-	// partition for quick sort
+	template <typename RandomAccessIterator>
+	inline void partial_sort(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last) {
+		__partial_sort(first, middle, last, value_type(first));
+	}
+	
+	//! O(n)
+	template <typename RandomAccessIterator, typename T, typename Compare>
+	void __partial_sort(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last, T*, Compare comp) {
+		// this heap will maintain the order in first to middle
+		make_heap(first, middle);
+		// for the rest elements
+		for (RandomAccessIterator i = middle; i < last; ++i) {
+			// if bigger than top, then it is too large
+			if (comp(*i, *first)) {
+				// we pop the top, push a new element in middle to last
+				__pop_heap(first, middle, i, difference_type(first), T(*i));
+			}
+		}
+		sort_heap(first, middle);
+	}
+
+	template <typename RandomAccessIterator, typename Compare>
+	inline void partial_sort(RandomAccessIterator first, RandomAccessIterator middle, RandomAccessIterator last, Compare comp) {
+		__partial_sort(first, middle, last, value_type(first));
+	}
+
+	// same as partial_sort, maybe different container
+	//! O(n)
+	template <typename InputIterator, typename RandomAccessIterator, typename Distance, typename T>
+	RandomAccessIterator __partial_sort_copy(InputIterator first, InputIterator last, RandomAccessIterator result_first, RandomAccessIterator result_last, Distance*, T*) {
+		if (result_first == result_last) {
+			return result_first;
+		}
+		RandomAccessIterator result_middle = result_first;
+		while (first != last && result_middle != result_last) {
+			*result_middle = *first;
+			++result_middle;
+			++first;
+		}
+		make_heap(result_first, result_middle);
+		while (first != last) {
+			if (*first < *result_first) {
+				__adjust_heap(result_first, Distance(0), Distance(result_middle - result_first), T(*first));
+			}
+			++first;
+		}
+		sort_heap(result_first, result_middle);
+		return result_middle;
+	}
+
+	template <typename InputIterator, typename RandomAccessIterator>
+	inline RandomAccessIterator partial_sort_copy(InputIterator first, InputIterator last, RandomAccessIterator result_first, RandomAccessIterator result_last) {
+		return __partial_sort_copy(first, last, result_first, result_last, difference_type(result_first), value_type(first));
+	}
+	
+	//! O(n)
+	template <typename InputIterator, typename RandomAccessIterator, typename Distance, typename T, typename Compare>
+	RandomAccessIterator __partial_sort_copy(InputIterator first, InputIterator last, RandomAccessIterator result_first, RandomAccessIterator result_last, Distance*, T*, Compare comp) {
+		if (result_first == result_last) {
+			return result_first;
+		}
+		RandomAccessIterator result_middle = result_first;
+		while (first != last && result_middle != result_last) {
+			*result_middle = *first;
+			++result_middle;
+			++first;
+		}
+		make_heap(result_first, result_middle, comp);
+		while (first != last) {
+			if (comp(*first, *result_first)) {
+				__adjust_heap(result_first, Distance(0), Distance(result_middle - result_first), T(*first), comp);
+			}
+			++first;
+		}
+		sort_heap(result_first, result_middle, comp);
+		return result_middle;
+	}
+
+	template <typename InputIterator, typename RandomAccessIterator, typename Compare>
+	inline RandomAccessIterator partial_sort_copy(InputIterator first, InputIterator last, RandomAccessIterator result_first, RandomAccessIterator result_last, Compare comp) {
+		return __partial_sort_copy(first, last, result_first, result_last, difference_type(result_first), value_type(first), comp);
+	}
+
+	//! insertion sort !//
+
+	//! O(n)
+	template <typename RandomAccessIterator, typename T>
+	void __unguarded_linear_insert(RandomAccessIterator last, T value) {
+		RandomAccessIterator next = last;
+		--next;
+		while (value < *next) {
+			*last = *next;
+			last = next;
+			--next;
+		}
+		*last = value;
+	}
+
+	//! O(n)
+	template <typename RandomAccessIterator, typename T, typename Compare>
+	void __unguarded_linear_insert(RandomAccessIterator last, T value, Compare comp) {
+		RandomAccessIterator next = last;
+		--next;
+		while (comp(value, *next)) {
+			*last = *next;
+			last = next;
+			--next;
+		}
+		*last = value;
+	}
+
+	//! O(n^2)
+	template <typename RandomAccessIterator>
+	void __insertion_sort(RandomAccessIterator first, RandomAccessIterator last) {
+		if (first == last)
+			return;
+		for (RandomAccessIterator i = first + 1; i != last; ++i) {
+			auto value = *i;
+			if (*i < *first) {
+				copy_backward(first, i, i + 1);
+				*first = value;
+			}
+			else {
+				__unguarded_linear_insert(i, value);
+			}
+		}
+	}
+
+	//! O(n^2)
+	template <typename RandomAccessIterator, typename Compare>
+	void __insertion_sort(RandomAccessIterator first, RandomAccessIterator last, Compare comp) {
+		if (first == last)
+			return;
+		for (RandomAccessIterator i = first + 1; i != last; ++i) {
+			auto value = *i;
+			if (comp(*i, *first)) {
+				copy_backward(first, i, i + 1);
+				*first = value;
+			}
+			else {
+				__unguarded_linear_insert(i, value, comp);
+			}
+		}
+	}
+
+	// partition for quick sort, smaller element will appears
+	// at left and bigger will appears at right
 	//! O(n)
 	template <typename BidirectionalIterator, typename Predicate>
 	BidirectionalIterator partition(BidirectionalIterator first, BidirectionalIterator last, Predicate pred) {
@@ -1813,6 +2045,316 @@ namespace selfmadeSTL {
 			}
 			iter_swap(first, last);
 			++first;
+		}
+	}
+
+	//! O(n)
+	template <typename RandomAccessIterator, typename T>
+	RandomAccessIterator __unguarded_partition(RandomAccessIterator first, RandomAccessIterator last, T pivot) {
+		while (true) {
+			while (*first < pivot) {
+				++first;
+			}
+			--last;
+			while (pivot < *last) {
+				--last;
+			}
+			if (!(first < last)) {
+				return first;
+			}
+			iter_swap(first, last);
+			++first;
+		}
+	}
+
+	//! O(n)
+	template <typename RandomAccessIterator, typename T, typename Compare>
+	RandomAccessIterator __unguarded_partition(RandomAccessIterator first, RandomAccessIterator last, T pivot, Compare comp) {
+		while (true) {
+			while (comp(*first, pivot)) {
+				++first;
+			}
+			--last;
+			while (comp(pivot, *last)) {
+				--last;
+			}
+			if (!(first < last)) {
+				return first;
+			}
+			iter_swap(first, last);
+			++first;
+		}
+	}
+
+	// find the nth element of a range
+	// similar to partition, we need not to sort it
+	//! O(n)
+	template <typename RandomAccessIterator, typename T>
+	void __nth_element(RandomAccessIterator first, RandomAccessIterator nth, RandomAccessIterator last, T*) {
+		while (last - first > 3) {
+			RandomAccessIterator pivot = __unguarded_partition(first, last, T(median(*first, *(first + ((last - first) / 2)), *(last - 1))));
+			if (pivot <= nth) {
+				first = pivot;
+			}
+			else {
+				last = pivot;
+			}
+		}
+		__insertion_sort(first, last);
+	}
+
+	template <typename RandomAccessIterator>
+	inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth, RandomAccessIterator last) {
+		__nth_element(first, nth, last, value_type(first));
+	}
+
+	//! O(n)
+	template <typename RandomAccessIterator, typename T, typename Compare>
+	void __nth_element(RandomAccessIterator first, RandomAccessIterator nth, RandomAccessIterator last, T*, Compare comp) {
+		while (last - first > 3) {
+			RandomAccessIterator pivot = __unguarded_partition(first, last, T(median(*first, *(first + ((last - first) / 2)), *(last - 1), comp)), comp);
+			if (pivot <= nth) {
+				first = pivot;
+			}
+			else {
+				last = pivot;
+			}
+		}
+		__insertion_sort(first, last, comp);
+	}
+
+	template <typename RandomAccessIterator, typename Compare>
+	inline void nth_element(RandomAccessIterator first, RandomAccessIterator nth, RandomAccessIterator last, Compare comp) {
+		__nth_element(first, nth, last, value_type(first), comp);
+	}
+
+	const int threshold = 16;
+
+	//! O(threshold^2)
+	template <typename RandomAccessIterator>
+	void __final_insertion_sort(RandomAccessIterator first, RandomAccessIterator last) {
+		if (last - first > threshold) {
+			// in first range, techniques used in __insertion_sort
+			// like copy_backward maybe quicker
+			__insertion_sort(first, first + threshold);
+			// while in the rest part, we just need to move one by one in each range
+			for (RandomAccessIterator i = first + threshold; i != last; ++i) {
+				__unguarded_linear_insert(i, *i);
+			}
+		}
+		else {
+			__insertion_sort(first, last);
+		}
+	}
+
+	//! O(threshold^2)
+	template <typename RandomAccessIterator, typename Compare>
+	void __final_insertion_sort(RandomAccessIterator first, RandomAccessIterator last, Compare comp) {
+		if (last - first > threshold) {
+			__insertion_sort(first, first + threshold, comp);
+			for (RandomAccessIterator i = first + threshold; i != last; ++i) {
+				__unguarded_linear_insert(i, *i, comp);
+			}
+		}
+		else {
+			__insertion_sort(first, last, comp);
+		}
+	}
+
+	//! O(nlogn)
+	template <typename RandomAccessIterator, typename T, typename Size>
+	void __introsort_loop(RandomAccessIterator first, RandomAccessIterator last, T*, Size depth_limit) {
+		while (last - first > threshold) {
+			if (depth_limit == 0) {
+				// turns into heap sort if introsort works bad
+				// (to much partition)
+				partial_sort(first, last, last);
+				return;
+			}
+			--depth_limit;
+			RandomAccessIterator pivot = __unguarded_partition(first, last, T(median(*first, *(first + ((last - first) / 2)), *(last - 1))));
+			__introsort_loop(pivot, last, value_type(first), depth_limit);
+			last = pivot;
+		}
+	}
+
+	//! O(nlogn)
+	template <typename RandomAccessIterator, typename T, typename Size, typename Compare>
+	void __introsort_loop(RandomAccessIterator first, RandomAccessIterator last, T*, Size depth_limit, Compare comp) {
+		while (last - first > threshold) {
+			if (depth_limit == 0) {
+				partial_sort(first, last, last, comp);
+				return;
+			}
+			--depth_limit;
+			RandomAccessIterator pivot = __unguarded_partition(first, last, T(median(*first, *(first + ((last - first) / 2)), *(last - 1), comp)), comp);
+			__introsort_loop(pivot, last, value_type(first), depth_limit, comp);
+			last = pivot;
+		}
+	}
+
+	//! O(logn)
+	template <typename Size>
+	inline Size __log2(Size n) {
+		Size k;
+		for (k = 0; n != 1; n >>= 1) {
+			++k;
+		}
+		return k;
+	}
+
+	//! O(nlogn)
+	template <typename RandomAccessIterator>
+	inline void sort(RandomAccessIterator first, RandomAccessIterator last) {
+		if (first != last) {
+			// introsort will break a range into several ranges,
+			// each range is no longer than threshold.
+			// elements in previous range will not bigger than elements in posterior range
+			// so insertion sort can handle each range without affecting other ranges
+			__introsort_loop(first, last, value_type(first), __log2(last - first) * 2);
+			__final_insertion_sort(first, last);
+		}
+	}
+
+	//! O(nlogn)
+	template <typename RandomAccessIterator, typename Compare>
+	inline void sort(RandomAccessIterator first, RandomAccessIterator last, Compare comp) {
+		if (first != last) {
+			__introsort_loop(first, last, value_type(first), __log2(last - first) * 2, comp);
+			__final_insertion_sort(first, last, comp);
+		}
+	}
+
+	// prepare for merge sort
+	//! O(n)
+	template <typename BidirectionalIterator, typename Distance>
+	void __merge_without_buffer(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Distance len1, Distance len2) {
+		if (len1 == 0 || len2 == 0) {
+			return;
+		}
+		if (len1 + len2 == 2) {
+			if (*middle < *first) {
+				iter_swap(first, middle);
+			}
+			return;
+		}
+		BidirectionalIterator first_cut = first;
+		BidirectionalIterator second_cut = middle;
+		Distance len11 = 0;
+		Distance len22 = 0;
+		if (len1 > len2) {
+			len11 = len1 / 2;
+			advance(first_cut, len11);
+			second_cut = lower_bound(middle, last, *first_cut);
+			len22 = distance(middle, second_cut);
+		}
+		else {
+			len22 = len2 / 2;
+			advance(second_cut, len22);
+			first_cut = upper_bound(first, middle, *second_cut);
+			len11 = distance(first, first_cut);
+		}
+		// rotate smaller to the front of the range
+		rotate(first_cut, middle, second_cut);
+		BidirectionalIterator new_middle = first_cut + len22;
+		__merge_without_buffer(first, first_cut, new_middle, len11, len22);
+		__merge_without_buffer(new_middle, second_cut, last, len1 - len11, len2 - len22);
+	}
+
+	template <typename BidirectionalIterator, typename T, typename Distance>
+	inline void __inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, T*, Distance*) {
+		Distance len1 = distance(first, middle);
+		Distance len2 = distance(middle, last);
+
+		__merge_without_buffer(first, middle, last, len1, len2);
+	}
+
+	template <typename BidirectionalIterator>
+	inline void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last) {
+		if (first == middle || middle == last) {
+			return;
+		}
+		__inplace_merge(first, middle, last, value_type(first), difference_type(first));
+	}
+
+	//! O(n)
+	template <typename BidirectionalIterator, typename Distance, typename Compare>
+	void __merge_without_buffer(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Distance len1, Distance len2, Compare comp) {
+		if (len1 == 0 || len2 == 0) {
+			return;
+		}
+		if (len1 + len2 == 2) {
+			if (comp(*middle, *first)) {
+				iter_swap(first, middle);
+			}
+			return;
+		}
+		BidirectionalIterator first_cut = first;
+		BidirectionalIterator second_cut = middle;
+		Distance len11 = 0;
+		Distance len22 = 0;
+		if (len1 > len2) {
+			len11 = len1 / 2;
+			advance(first_cut, len11);
+			second_cut = lower_bound(middle, last, *first_cut, comp);
+			len22 = distance(middle, second_cut);
+		}
+		else {
+			len22 = len2 / 2;
+			advance(second_cut, len22);
+			first_cut = upper_bound(first, middle, *second_cut, comp);
+			len11 = distance(first, first_cut);
+		}
+		// rotate smaller to the front of the range
+		rotate(first_cut, middle, second_cut);
+		BidirectionalIterator new_middle = first_cut + len22;
+		__merge_without_buffer(first, first_cut, new_middle, len11, len22, comp);
+		__merge_without_buffer(new_middle, second_cut, last, len1 - len11, len2 - len22, comp);
+	}
+
+	template <typename BidirectionalIterator, typename T, typename Distance, typename Compare>
+	inline void __inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, T*, Distance*, Compare comp) {
+		Distance len1 = distance(first, middle);
+		Distance len2 = distance(middle, last);
+
+		__merge_without_buffer(first, middle, last, len1, len2, comp);
+	}
+
+	template <typename BidirectionalIterator, typename Compare>
+	inline void inplace_merge(BidirectionalIterator first, BidirectionalIterator middle, BidirectionalIterator last, Compare comp) {
+		if (first == middle || middle == last) {
+			return;
+		}
+		__inplace_merge(first, middle, last, value_type(first), difference_type(first), comp);
+	}
+
+	//! O(nlogn)
+	template <typename BidirectionalIterator>
+	void merge_sort(BidirectionalIterator first, BidirectionalIterator last) {
+		auto n = distance(first, last);
+		if (n == 0 || n == 1) {
+			return;
+		}
+		else {
+			BidirectionalIterator middle = first + n / 2;
+			merge_sort(first, middle);
+			merge_sort(middle, last);
+			inplace_merge(first, middle, last);
+		}
+	}
+
+	//! O(nlogn)
+	template <typename BidirectionalIterator, typename Compare>
+	void merge_sort(BidirectionalIterator first, BidirectionalIterator last, Compare comp) {
+		auto n = distance(first, last);
+		if (n == 0 || n == 1) {
+			return;
+		}
+		else {
+			BidirectionalIterator middle = first + n / 2;
+			merge_sort(first, middle, comp);
+			merge_sort(middle, last, comp);
+			inplace_merge(first, middle, last, comp);
 		}
 	}
 

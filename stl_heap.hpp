@@ -56,7 +56,7 @@ namespace selfmadeSTL {
     // pop
     template <typename RandomAccessIterator, typename Distance, typename T>
     void __adjust_heap(RandomAccessIterator first, Distance holeIndex, Distance len, T value) {
-        // the popped element
+        // pop top element
         Distance topIndex = holeIndex;
         Distance secondChild = 2 * holeIndex + 2;
         while (secondChild < len) {
@@ -74,12 +74,14 @@ namespace selfmadeSTL {
             *(first + holeIndex) = *(first + (secondChild - 1));
             holeIndex = secondChild - 1;
         }
+        // insert a new value
         __push_heap(first, holeIndex, topIndex, value);
     }
 
     template <typename RandomAccessIterator, typename Distance, typename T>
     inline void __pop_heap(RandomAccessIterator first, RandomAccessIterator last, RandomAccessIterator result, Distance*, T value) {
         *result = *first;
+        // pop top and insert at the last position
         __adjust_heap(first, Distance(0), Distance(last - first), value);
     }
 
@@ -176,14 +178,16 @@ template <typename RandomAccessIterator, typename Distance, typename T, typename
     template <typename RandomAccessIterator>
     void sort_heap(RandomAccessIterator first, RandomAccessIterator last) {
         while(last - first > 1) {
-            pop_heap(first, last - 1);
+            pop_heap(first, last);
+            --last;
         }
     }
 
     template <typename RandomAccessIterator, typename Compare>
     void sort_heap(RandomAccessIterator first, RandomAccessIterator last, Compare comp) {
         while(last - first > 1) {
-            pop_heap(first, last - 1, comp);
+            pop_heap(first, last, comp);
+            --last;
         }
     }
 

@@ -11,7 +11,6 @@
 
 using std::cout;
 using std::endl;
-using std::complex;
 using std::default_random_engine;
 using std::uniform_real_distribution;
 using std::numeric_limits;

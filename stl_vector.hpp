@@ -156,16 +156,14 @@ namespace selfmadeSTL {
         }
         
         vector& operator=(const vector& other) {
-            if (this == &other) {
-                return *this;
-            }
-            else {
+            if (this != &other) {
                 destory(start, finish);
                 vector_allocator::deallocate(start, capacity());
                 start = vector_allocator::allocate(other.size());
                 finish = selfmadeSTL::uninitialized_copy(other.begin(), other.end(), begin());
                 end_of_storage = finish;
             }
+            return *this;
         }
 
         ~vector() {

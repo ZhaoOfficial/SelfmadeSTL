@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include "../stl_algorithm.hpp"
 #include "../stl_function.hpp"
@@ -179,6 +180,125 @@ int main() {
 	random_shuffle(v8.begin(), v8.end());
 	for_each(v8.begin(), v8.end(), display<int>());
 	cout << endl;
+
+	cout << "partial_sort: ";
+	partial_sort(v8.begin(), v8.begin() + 4, v8.end());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	cout << "partial_sort_copy: ";
+	partial_sort_copy(v8.begin(), v8.begin() + 4, arr3, arr3 + 4, greater<int>());
+	for_each(arr3, arr3 + 8, display<int>());
+	cout << endl;
+
+	cout << "sort: ";
+	random_shuffle(v8.begin(), v8.end());
+	sort(v8.begin(), v8.end());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	cout << "sort: ";
+	random_shuffle(v8.begin(), v8.end());
+	sort(v8.begin(), v8.end(), greater<int>());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	vector<int> v9(100000);
+	int value = 0;
+	generate(v9.begin(), v9.end(), [&value]() { return value++; });
+	cout << "sort: ";
+	random_shuffle(v9.begin(), v9.end());
+	sort(v9.begin(), v9.end());
+	cout << v9.front() << ' ' << v9.back() << ' ';
+	sort(v9.begin(), v9.end(), greater<int>());
+	cout << v9.front() << ' ' << v9.back() << endl;
+
+	v8.push_back(22);
+	v8.push_back(30);
+	v8.push_back(17);
+	cout << "equal_range: ";
+	sort(v8.begin(), v8.end());
+	for_each(v8.begin(), v8.end(), display<int>());
+	auto iter1 = equal_range(v8.begin(), v8.end(), 22);
+	cout << " || " << *iter1.first << " " << *iter1.second << " " << iter1.second - iter1.first << endl;
+	cout << "equal_range: ";
+	sort(v8.begin(), v8.end(), greater<int>());
+	for_each(v8.begin(), v8.end(), display<int>());
+	auto iter2 = equal_range(v8.begin(), v8.end(), 30, greater<int>());
+	cout << " || " << *iter2.first << " " << *iter2.second << " " << iter2.second - iter2.first << endl;
+
+	cout << "nth_element: ";
+	random_shuffle(v8.begin(), v8.end());
+	cout << *(v8.begin() + 5) << " || ";
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << " || ";
+	nth_element(v8.begin(), v8.begin() + 5, v8.end());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	cout << "nth_element: ";
+	random_shuffle(v8.begin(), v8.end());
+	cout << *(v8.begin() + 5) << " || ";
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << " || ";
+	nth_element(v8.begin(), v8.begin() + 5, v8.end(), greater<int>());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	cout << "merge_sort: ";
+	random_shuffle(v8.begin(), v8.end());
+	merge_sort(v8.begin(), v8.end());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	cout << "merge_sort: ";
+	random_shuffle(v8.begin(), v8.end());
+	merge_sort(v8.begin(), v8.end(), greater<int>());
+	for_each(v8.begin(), v8.end(), display<int>());
+	cout << endl;
+
+	cout << "merge_sort: ";
+	random_shuffle(v9.begin(), v9.end());
+	merge_sort(v9.begin(), v9.end());
+	cout << v9.front() << ' ' << v9.back() << ' ';
+	merge_sort(v9.begin(), v9.end(), greater<int>());
+	cout << v9.front() << ' ' << v9.back() << endl;
+
+	random_shuffle(v9.begin(), v9.end());
+	vector<int> v10 = v9;
+	// 15ms
+	auto start = std::chrono::high_resolution_clock::now();
+	sort(v9.begin(), v9.end());
+	auto end = std::chrono::high_resolution_clock::now();
+	cout << "sort time: " << (double)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms || " << v9.front() << ' ' << v9.back() << endl;
+
+	// it can be much faster if we use buffer: 550ms
+	v9 = v10;
+	start = std::chrono::high_resolution_clock::now();
+	merge_sort(v9.begin(), v9.end());
+	end = std::chrono::high_resolution_clock::now();
+	cout << "merge sort time: " << (double)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms || " << v9.front() << ' ' << v9.back() << endl;
+
+	// 30ms
+	v9 = v10;
+	start = std::chrono::high_resolution_clock::now();
+	partial_sort(v9.begin(), v9.end(), v9.end());
+	end = std::chrono::high_resolution_clock::now();
+	cout << "heap sort time: " << (double)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms || " << v9.front() << ' ' << v9.back() << endl;
+
+	// to test this, you need to change the code: 120ms
+	//v9 = v10;
+	//start = std::chrono::high_resolution_clock::now();
+	//__introsort_loop(v9.begin(), v9.end(), (int*)0, 28, 0);
+	//end = std::chrono::high_resolution_clock::now();
+	//cout << "intro sort time: " << (double)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms || " << v9.front() << ' ' << v9.back() << endl;
+
+	// 4000ms
+	v9 = v10;
+	start = std::chrono::high_resolution_clock::now();
+	__insertion_sort(v9.begin(), v9.end());
+	end = std::chrono::high_resolution_clock::now();
+	cout << "insertion sort time: " << (double)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms || " << v9.front() << ' ' << v9.back() << endl;
 
 	return 0;
 }

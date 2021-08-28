@@ -55,6 +55,10 @@ public:
 		std::cout << '[' << this->ptr->real() << " + " << this->ptr->imag() << ']';
 	}
 
+	void print_1arg(const char* str) const {
+		std::cout << '[' << this->ptr->real() << str << this->ptr->imag() << ']';
+	}
+
 	std::complex<double>* ptr;
 };
 

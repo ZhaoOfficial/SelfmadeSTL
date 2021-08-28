@@ -15,9 +15,25 @@ using std::uniform_real_distribution;
 using namespace selfmadeSTL;
 
 template<typename InputIterator, typename UnaryOperator>
-UnaryOperator for_each_pointer(InputIterator first, InputIterator last, UnaryOperator op) {
+UnaryOperator for_each_ptr(InputIterator first, InputIterator last, UnaryOperator op) {
     for (; first != last; ++first) {
         op(first);
+    }
+    return op;
+}
+
+template<typename InputIterator, typename UnaryOperator>
+UnaryOperator for_each_ptr_2arg(InputIterator first, InputIterator last, const char* str, UnaryOperator op) {
+    for (; first != last; ++first) {
+        op(first, str);
+    }
+    return op;
+}
+
+template<typename InputIterator, typename UnaryOperator>
+UnaryOperator for_each_ref_2arg(InputIterator first, InputIterator last, const char* str, UnaryOperator op) {
+    for (; first != last; ++first) {
+        op(*first, str);
     }
     return op;
 }
@@ -78,11 +94,19 @@ int main() {
     cout << endl;
 
     cout << "mem_fun: ";
-    for_each_pointer(n.begin(), n.end(), mem_fun(&Npod::print));
+    for_each_ptr(n.begin(), n.end(), mem_fun(&Npod::print));
     cout << endl;
 
     cout << "mem_fun_ref: ";
     for_each(n.begin(), n.end(), mem_fun_ref(&Npod::print));
+    cout << endl;
+
+    cout << "mem_fun1: ";
+    for_each_ptr_2arg(n.begin(), n.end(), " @ ", mem_fun(&Npod::print_1arg));
+    cout << endl;
+
+    cout << "mem_fun1_ref: ";
+    for_each_ref_2arg(n.begin(), n.end(), " @ ", mem_fun_ref(&Npod::print_1arg));
     cout << endl;
 
     return 0;

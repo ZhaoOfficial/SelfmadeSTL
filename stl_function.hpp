@@ -456,8 +456,8 @@ namespace selfmadeSTL{
     }
 
     template <typename Return, typename Type, typename Arg>
-    inline const_mem_fun1_t<Return, Type, Arg> mem_fun_ref(Return (Type::*ptr)(Arg) const) {
-        return const_mem_fun1_t<Return, Type, Arg>(ptr);
+    inline const_mem_fun1_ref_t<Return, Type, Arg> mem_fun_ref(Return (Type::*ptr)(Arg) const) {
+        return const_mem_fun1_ref_t<Return, Type, Arg>(ptr);
     }
 
 }
